@@ -28,16 +28,21 @@
 
     <style>
         :root {
-            --bg-color: #0b0f14;
-            --card-bg: #131920;
-            --card-hover: #1c2530;
-            --border-color: #232d3b;
-            --border-hover: #3b82f6;
+            --bg-color: #070a0e;
+            --card-bg: rgba(18, 24, 32, 0.7);
+            --card-hover: rgba(28, 38, 50, 0.85);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(56, 189, 248, 0.5);
             --text-main: #f1f5f9;
             --text-muted: #94a3b8;
             --accent: #38bdf8;
-            --badge-bg: #1e293b;
+            --accent-glow: rgba(56, 189, 248, 0.25);
+            --badge-bg: rgba(30, 41, 59, 0.7);
             --badge-text: #cbd5e1;
+            --status-online: #22c55e;
+            --status-idle: #eab308;
+            --status-dnd: #ef4444;
+            --status-offline: #64748b;
         }
 
         * {
@@ -53,29 +58,96 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            padding: 24px 16px;
+            padding: 32px 16px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Ambient animated glow background */
+        .ambient-glow {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.12) 0%, rgba(16, 185, 129, 0.08) 40%, transparent 70%);
+            filter: blur(80px);
+            z-index: 0;
+            pointer-events: none;
+            animation: pulseGlow 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulseGlow {
+            0% {
+                transform: translate(-50%, -50%) scale(0.9);
+                opacity: 0.7;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1.15);
+                opacity: 1;
+            }
         }
 
         .container {
             max-width: 440px;
             width: 100%;
             text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Top status pills row */
+        .status-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            font-size: 12px;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            background: var(--badge-bg);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(8px);
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .pill-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 6px var(--accent);
+        }
+
+        .pfp-wrapper {
+            position: relative;
+            width: 108px;
+            height: 108px;
+            margin: 0 auto 16px;
         }
 
         .pfp {
-            width: 104px;
-            height: 104px;
+            width: 100%;
+            height: 100%;
             border-radius: 50%;
-            margin: 0 auto 16px;
             overflow: hidden;
             border: 2px solid var(--border-color);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
             background: var(--card-bg);
             transition: transform 0.25s ease, border-color 0.25s ease;
         }
 
         .pfp:hover {
-            transform: scale(1.04);
+            transform: scale(1.05);
             border-color: var(--accent);
         }
 
@@ -86,18 +158,57 @@
             display: block;
         }
 
+        .status-indicator {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--status-offline);
+            border: 3px solid var(--bg-color);
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+            transition: background-color 0.3s ease;
+        }
+
         h1 {
             margin: 0 0 6px;
-            font-size: 22px;
+            font-size: 24px;
             font-weight: 700;
             letter-spacing: -0.02em;
         }
 
-        .handle {
+        /* Click to copy handle badge */
+        .handle-btn {
+            background: transparent;
+            border: none;
             color: var(--accent);
             font-size: 14px;
             font-weight: 500;
-            margin-bottom: 14px;
+            cursor: pointer;
+            padding: 4px 10px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s, color 0.2s;
+            margin-bottom: 12px;
+        }
+
+        .handle-btn:hover {
+            background: rgba(56, 189, 248, 0.1);
+        }
+
+        .handle-btn svg {
+            width: 14px;
+            height: 14px;
+            opacity: 0.7;
+        }
+
+        .copied-tooltip {
+            font-size: 11px;
+            color: #22c55e;
+            display: none;
         }
 
         .bio {
@@ -107,12 +218,41 @@
             line-height: 1.5;
         }
 
+        /* Discord Activity Card (Lanyard) */
+        .activity-card {
+            display: none;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        .activity-header {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--accent);
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .activity-details {
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
         .tags {
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
             justify-content: center;
-            margin-bottom: 24px;
+            margin-bottom: 22px;
         }
 
         .tag {
@@ -122,12 +262,14 @@
             padding: 4px 10px;
             border-radius: 9999px;
             border: 1px solid var(--border-color);
+            backdrop-filter: blur(6px);
         }
 
         .links {
             display: flex;
             flex-direction: column;
             gap: 10px;
+            margin-bottom: 22px;
         }
 
         .link-card {
@@ -135,12 +277,13 @@
             align-items: center;
             justify-content: space-between;
             background: var(--card-bg);
+            backdrop-filter: blur(12px);
             color: var(--text-main);
             text-decoration: none;
             padding: 14px 18px;
-            border-radius: 10px;
+            border-radius: 12px;
             border: 1px solid var(--border-color);
-            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
             font-size: 14px;
             font-weight: 500;
         }
@@ -167,11 +310,12 @@
             background: var(--card-hover);
             border-color: var(--border-hover);
             transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
         }
 
         .link-card:hover .arrow {
             opacity: 1;
-            transform: translateX(3px);
+            transform: translateX(4px);
         }
 
         .link-card:focus-visible {
@@ -179,8 +323,74 @@
             outline-offset: 2px;
         }
 
+        /* Collapsible Hardware / Specs drawer */
+        details.specs-drawer {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            text-align: left;
+            transition: border-color 0.2s;
+        }
+
+        details.specs-drawer[open] {
+            border-color: var(--border-hover);
+        }
+
+        summary.specs-summary {
+            padding: 12px 18px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            user-select: none;
+        }
+
+        summary.specs-summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary.specs-summary:hover {
+            color: var(--text-main);
+        }
+
+        .specs-content {
+            padding: 0 18px 14px;
+            font-size: 12px;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            margin-top: 4px;
+            padding-top: 10px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 12px;
+        }
+
+        .spec-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .spec-label {
+            color: #64748b;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .spec-val {
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
         footer {
-            margin-top: 28px;
+            margin-top: 24px;
             font-size: 12px;
             color: #64748b;
         }
@@ -188,17 +398,48 @@
 </head>
 
 <body>
+    <div class="ambient-glow"></div>
+
     <main class="container">
-        <div class="pfp">
-            <img src="https://github.com/DesireThings.png" alt="Profile Picture" width="104" height="104">
+        <!-- Status / Location pill row -->
+        <div class="status-row">
+            <div class="pill">
+                <span class="pill-dot"></span>
+                <span id="local-clock">UK &bull; --:--</span>
+            </div>
+            <div class="pill">
+                <span>CachyOS Linux</span>
+            </div>
+        </div>
+
+        <div class="pfp-wrapper">
+            <div class="pfp">
+                <img src="https://github.com/DesireThings.png" alt="Profile Picture" width="108" height="108">
+            </div>
+            <div class="status-indicator" id="discord-indicator" title="Discord Status"></div>
         </div>
 
         <h1>Remi / Ashley</h1>
-        <div class="handle">@DesireThings &bull; desire_things</div>
+
+        <button class="handle-btn" id="copy-btn" title="Click to copy Discord handle" aria-label="Copy Discord handle">
+            <span id="handle-text">@DesireThings &bull; desire_things</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <span class="copied-tooltip" id="copied-badge">Copied!</span>
+        </button>
 
         <p class="bio">
             Linux enthusiast & CachyOS daily driver. osu! player, Torii Nova contributor, and community admin.
         </p>
+
+        <!-- Live Activity Card (populated dynamically if active) -->
+        <div class="activity-card" id="activity-box">
+            <div class="activity-header" id="activity-label">Playing</div>
+            <div class="activity-details" id="activity-name">osu!</div>
+        </div>
 
         <div class="tags">
             <span class="tag">CachyOS</span>
@@ -258,10 +499,118 @@
             </a>
         </nav>
 
+        <!-- Hardware & Rig Specs Drawer -->
+        <details class="specs-drawer">
+            <summary class="specs-summary">
+                <span>System & Hardware</span>
+                <span style="font-size: 11px; opacity: 0.7;">view specs &darr;</span>
+            </summary>
+            <div class="specs-content">
+                <div class="spec-item">
+                    <span class="spec-label">OS</span>
+                    <span class="spec-val">CachyOS (Arch)</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">CPU</span>
+                    <span class="spec-val">i5-13600KF</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">GPU</span>
+                    <span class="spec-val">RX 9070 XT 16GB</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">RAM</span>
+                    <span class="spec-val">32GB DDR4 3200</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Shell</span>
+                    <span class="spec-val">fish / starship</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Display</span>
+                    <span class="spec-val">1440p 180Hz</span>
+                </div>
+            </div>
+        </details>
+
         <footer>
             <span>&copy; Remi / Ashley</span>
         </footer>
     </main>
+
+    <script>
+        // Live UK Clock
+        function updateClock() {
+            try {
+                const now = new Date();
+                const timeString = new Intl.DateTimeFormat('en-GB', {
+                    timeZone: 'Europe/London',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                }).format(now);
+                const clockEl = document.getElementById('local-clock');
+                if (clockEl) {
+                    clockEl.textContent = `UK \u2022 ${timeString}`;
+                }
+            } catch (e) { }
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        // Click to copy Discord tag
+        const copyBtn = document.getElementById('copy-btn');
+        const copiedBadge = document.getElementById('copied-badge');
+        if (copyBtn) {
+            copyBtn.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText('desire_things');
+                    copiedBadge.style.display = 'inline';
+                    setTimeout(() => {
+                        copiedBadge.style.display = 'none';
+                    }, 2000);
+                } catch (e) { }
+            });
+        }
+
+        // Live Discord Status (Lanyard)
+        const DISCORD_USER_ID = '882747349615652924';
+        async function fetchLanyard() {
+            try {
+                const res = await fetch(`https://api.lanyard.rest/v1/users/${DISCORD_USER_ID}`);
+                const data = await res.json();
+                if (data.success && data.data) {
+                    const status = data.data.discord_status || 'offline';
+                    const indicator = document.getElementById('discord-indicator');
+                    if (indicator) {
+                        const colors = {
+                            online: 'var(--status-online)',
+                            idle: 'var(--status-idle)',
+                            dnd: 'var(--status-dnd)',
+                            offline: 'var(--status-offline)'
+                        };
+                        indicator.style.backgroundColor = colors[status] || colors.offline;
+                        indicator.title = `Discord: ${status}`;
+                    }
+
+                    // Activity display
+                    const activities = data.data.activities || [];
+                    const activity = activities.find(a => a.type === 0) || activities[0];
+                    const activityBox = document.getElementById('activity-box');
+                    const activityLabel = document.getElementById('activity-label');
+                    const activityName = document.getElementById('activity-name');
+
+                    if (activity && activityBox) {
+                        activityBox.style.display = 'block';
+                        activityLabel.textContent = activity.type === 2 ? 'Listening to' : 'Playing';
+                        activityName.textContent = activity.name + (activity.details ? ` - ${activity.details}` : '');
+                    }
+                }
+            } catch (e) { }
+        }
+        fetchLanyard();
+        setInterval(fetchLanyard, 30000);
+    </script>
 </body>
 
 </html>
