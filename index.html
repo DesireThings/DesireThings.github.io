@@ -123,6 +123,54 @@
             z-index: 1;
             display: flex;
             flex-direction: column;
+            transition: max-width 0.25s ease, opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .terminal-container.is-minimized .terminal-body,
+        .terminal-container.is-minimized footer {
+            display: none !important;
+        }
+
+        .terminal-container.is-maximized {
+            max-width: 960px;
+        }
+
+        .terminal-container.is-closed {
+            opacity: 0;
+            transform: scale(0.95);
+            pointer-events: none;
+        }
+
+        .terminal-restore-toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--term-header);
+            border: 1px solid var(--term-border);
+            padding: 8px 16px;
+            font-size: 13px;
+            color: var(--term-fg);
+            display: none;
+            align-items: center;
+            gap: 12px;
+            z-index: 10;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+        }
+
+        .terminal-restore-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--term-inner-border);
+            color: var(--c-magenta);
+            font-family: inherit;
+            padding: 4px 10px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .terminal-restore-btn:hover {
+            background: var(--c-magenta);
+            color: #141414;
         }
 
         /* KDE / Klassy Style Titlebar */
@@ -181,6 +229,9 @@
             justify-content: center;
             cursor: pointer;
             color: var(--term-fg-faint);
+            background: transparent;
+            border: none;
+            padding: 0;
             transition: background 0.15s, color 0.15s;
         }
 
@@ -600,23 +651,24 @@
                 <div class="terminal-status" id="live-clock">UK &bull; --:--</div>
 
                 <!-- Klassy Window Buttons (Minimize, Maximize/Restore, Close) -->
-                <div class="klassy-buttons" aria-hidden="true">
-                    <div class="klassy-btn btn-min" title="Minimize">
+                <div class="klassy-buttons" aria-label="Window controls">
+                    <button class="klassy-btn btn-min" id="win-min" title="Minimize / Roll up" aria-label="Minimize">
                         <svg viewBox="0 0 12 12">
                             <line x1="2" y1="6" x2="10" y2="6"></line>
                         </svg>
-                    </div>
-                    <div class="klassy-btn btn-max" title="Maximize">
+                    </button>
+                    <button class="klassy-btn btn-max" id="win-max" title="Maximize / Toggle width"
+                        aria-label="Maximize">
                         <svg viewBox="0 0 12 12">
                             <rect x="2" y="2" width="8" height="8"></rect>
                         </svg>
-                    </div>
-                    <div class="klassy-btn btn-close" title="Close">
+                    </button>
+                    <button class="klassy-btn btn-close" id="win-close" title="Close session" aria-label="Close">
                         <svg viewBox="0 0 12 12">
                             <line x1="2" y1="2" x2="10" y2="10"></line>
                             <line x1="10" y1="2" x2="2" y2="10"></line>
                         </svg>
-                    </div>
+                    </button>
                 </div>
             </div>
         </div>
@@ -684,7 +736,7 @@
                 <div class="fastfetch-box">
                     <div class="fetch-header">── Software ──</div>
                     <div class="fetch-entry"><span class="fetch-key">OS:</span><span class="fetch-val">CachyOS x86_64
-                            (Linux 7.2.9-2-cachyos)</span></div>
+                            (linux-cachyos-bore)</span></div>
                     <div class="fetch-entry"><span class="fetch-key">Desktop:</span><span class="fetch-val">KDE Plasma 6
                             (Wayland) &bull; KWin</span></div>
                     <div class="fetch-entry"><span class="fetch-key">Theme:</span><span class="fetch-val">MateriaDark
@@ -772,6 +824,18 @@
                         <span class="arrow">&rarr;</span>
                     </a>
 
+                    <a class="term-link" href="https://github.com/ShikkesoraSIM/torii-osu" target="_blank"
+                        rel="noopener noreferrer">
+                        <div class="link-left">
+                            <svg viewBox="0 0 512 512" aria-hidden="true">
+                                <path
+                                    d="M376.45 32h-240.9A303.17 303.17 0 0 1 0 0v96c0 17.67 14.33 32 32 32h32v64H16c-8.84 0-16 7.16-16 16v32c0 8.84 7.16 16 16 16h48v240c0 8.84 7.16 16 16 16h32c8.84 0 16-7.16 16-16V256h256v240c0 8.84 7.16 16 16 16h32c8.84 0 16-7.16 16-16V256h48c8.84 0 16-7.16 16-16v-32c0-8.84-7.16-16-16-16h-48v-64h32c17.67 0 32-14.33 32-32V0a303.17 303.17 0 0 1-135.55 32zM128 128h96v64h-96v-64zm256 64h-96v-64h96v64z" />
+                            </svg>
+                            <span>torii-nova</span>
+                        </div>
+                        <span class="arrow">&rarr;</span>
+                    </a>
+
                     <a class="term-link" href="https://torii-web.shikkesora.com/users/96" target="_blank"
                         rel="noopener noreferrer">
                         <div class="link-left">
@@ -804,6 +868,11 @@
             <span>tty1 &bull; System24 &bull; UTF-8</span>
         </footer>
     </main>
+
+    <div class="terminal-restore-toast" id="restore-toast">
+        <span>Terminal session hidden</span>
+        <button class="terminal-restore-btn" id="restore-btn">Restore (fg)</button>
+    </div>
 
     <script>
         // Live UK Clock
@@ -840,43 +909,127 @@
             });
         }
 
-        // Live Discord Status (Lanyard)
+        // Live Discord Status via Lanyard (WebSocket with REST fallback)
         const DISCORD_USER_ID = '882747349615652924';
-        async function fetchLanyard() {
+
+        function applyLanyardData(d) {
+            if (!d) return;
+            const status = d.discord_status || 'offline';
+            const indicator = document.getElementById('discord-indicator');
+            if (indicator) {
+                const colors = {
+                    online: 'var(--status-online)',
+                    idle: 'var(--status-idle)',
+                    dnd: 'var(--status-dnd)',
+                    offline: 'var(--status-offline)'
+                };
+                indicator.style.backgroundColor = colors[status] || colors.offline;
+                indicator.title = `Discord: ${status}`;
+            }
+
+            // Activity display
+            const activities = d.activities || [];
+            const spotify = d.spotify;
+            const activity = spotify
+                ? { type: 2, name: 'Spotify', details: `${spotify.song} by ${spotify.artist}` }
+                : (activities.find(a => a.type === 0) || activities[0]);
+
+            const activityBox = document.getElementById('activity-box');
+            const activityLabel = document.getElementById('activity-label');
+            const activityName = document.getElementById('activity-name');
+
+            if (activity && activityBox && activityLabel && activityName) {
+                activityBox.style.display = 'block';
+                activityLabel.textContent = activity.type === 2 ? 'Listening to' : 'Playing';
+                activityName.textContent = activity.name + (activity.details ? ` - ${activity.details}` : '');
+            } else if (activityBox) {
+                activityBox.style.display = 'none';
+            }
+        }
+
+        // Fast initial REST fetch
+        fetch(`https://api.lanyard.rest/v1/users/${DISCORD_USER_ID}`)
+            .then(res => res.json())
+            .then(json => { if (json.success && json.data) applyLanyardData(json.data); })
+            .catch(() => { });
+
+        // Real-time WebSocket connection
+        let heartbeatInterval = null;
+        function connectLanyardSocket() {
             try {
-                const res = await fetch(`https://api.lanyard.rest/v1/users/${DISCORD_USER_ID}`);
-                const data = await res.json();
-                if (data.success && data.data) {
-                    const status = data.data.discord_status || 'offline';
-                    const indicator = document.getElementById('discord-indicator');
-                    if (indicator) {
-                        const colors = {
-                            online: 'var(--status-online)',
-                            idle: 'var(--status-idle)',
-                            dnd: 'var(--status-dnd)',
-                            offline: 'var(--status-offline)'
-                        };
-                        indicator.style.backgroundColor = colors[status] || colors.offline;
-                        indicator.title = `Discord: ${status}`;
-                    }
+                const ws = new WebSocket('wss://api.lanyard.rest/socket');
+                ws.onmessage = (event) => {
+                    try {
+                        const message = JSON.parse(event.data);
+                        const { op, t, d } = message;
 
-                    // Activity display
-                    const activities = data.data.activities || [];
-                    const activity = activities.find(a => a.type === 0) || activities[0];
-                    const activityBox = document.getElementById('activity-box');
-                    const activityLabel = document.getElementById('activity-label');
-                    const activityName = document.getElementById('activity-name');
+                        if (op === 1) { // Hello
+                            if (heartbeatInterval) clearInterval(heartbeatInterval);
+                            heartbeatInterval = setInterval(() => {
+                                if (ws.readyState === WebSocket.OPEN) {
+                                    ws.send(JSON.stringify({ op: 3 }));
+                                }
+                            }, d.heartbeat_interval);
 
-                    if (activity && activityBox) {
-                        activityBox.style.display = 'block';
-                        activityLabel.textContent = activity.type === 2 ? 'Listening to' : 'Playing';
-                        activityName.textContent = activity.name + (activity.details ? ` - ${activity.details}` : '');
-                    }
-                }
+                            // Initialize subscription
+                            ws.send(JSON.stringify({
+                                op: 2,
+                                d: { subscribe_to_id: DISCORD_USER_ID }
+                            }));
+                        } else if (op === 0) { // Event
+                            if (t === 'INIT_STATE' || t === 'PRESENCE_UPDATE') {
+                                applyLanyardData(d);
+                            }
+                        }
+                    } catch (e) { }
+                };
+
+                ws.onclose = () => {
+                    if (heartbeatInterval) clearInterval(heartbeatInterval);
+                    setTimeout(connectLanyardSocket, 5000);
+                };
+
+                ws.onerror = () => {
+                    ws.close();
+                };
             } catch (e) { }
         }
-        fetchLanyard();
-        setInterval(fetchLanyard, 30000);
+        connectLanyardSocket();
+
+        // Klassy Window Controls Handling
+        const termContainer = document.querySelector('.terminal-container');
+        const btnMin = document.getElementById('win-min');
+        const btnMax = document.getElementById('win-max');
+        const btnClose = document.getElementById('win-close');
+        const restoreToast = document.getElementById('restore-toast');
+        const restoreBtn = document.getElementById('restore-btn');
+
+        if (btnMin && termContainer) {
+            btnMin.addEventListener('click', () => {
+                termContainer.classList.toggle('is-minimized');
+            });
+        }
+
+        if (btnMax && termContainer) {
+            btnMax.addEventListener('click', () => {
+                termContainer.classList.toggle('is-maximized');
+            });
+        }
+
+        if (btnClose && termContainer && restoreToast) {
+            btnClose.addEventListener('click', () => {
+                termContainer.classList.add('is-closed');
+                restoreToast.style.display = 'flex';
+            });
+        }
+
+        if (restoreBtn && termContainer && restoreToast) {
+            restoreBtn.addEventListener('click', () => {
+                termContainer.classList.remove('is-closed');
+                termContainer.classList.remove('is-minimized');
+                restoreToast.style.display = 'none';
+            });
+        }
     </script>
 </body>
 
