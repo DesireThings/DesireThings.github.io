@@ -7,7 +7,7 @@
     <title>Remi / Ashley (@DesireThings)</title>
     <meta name="description"
         content="Linux enthusiast, CachyOS user, osu! player, Torii Nova contributor and administrator.">
-    <meta name="theme-color" content="#10b981">
+    <meta name="theme-color" content="#1c1c1c">
 
     <!-- Open Graph / Discord embeds -->
     <meta property="og:type" content="website">
@@ -27,27 +27,39 @@
     <link rel="icon" type="image/png" href="https://github.com/DesireThings.png">
 
     <style>
+        /* System24 Konsole / CachyOS Palette */
         :root {
-            --bg-color: #070a0e;
-            --card-bg: rgba(18, 24, 32, 0.7);
-            --card-hover: rgba(28, 38, 50, 0.85);
-            --border-color: rgba(255, 255, 255, 0.08);
-            --border-hover: rgba(56, 189, 248, 0.5);
-            --text-main: #f1f5f9;
-            --text-muted: #94a3b8;
-            --accent: #38bdf8;
-            --accent-glow: rgba(56, 189, 248, 0.25);
-            --badge-bg: rgba(30, 41, 59, 0.7);
-            --badge-text: #cbd5e1;
-            --status-online: #22c55e;
-            --status-idle: #eab308;
-            --status-dnd: #ef4444;
-            --status-offline: #64748b;
-            --term-green: #4ade80;
-            --term-cyan: #38bdf8;
-            --term-magenta: #c084fc;
-            --term-yellow: #fde047;
-            --term-red: #f87171;
+            --bg-body: #141414;
+            --term-bg: rgba(28, 28, 28, 0.88);
+            --term-border: rgba(255, 255, 255, 0.08);
+            --term-header: #232323;
+            --term-fg: #cfcfcf;
+            --term-fg-faint: #808080;
+            --term-fg-intense: #eeeeee;
+
+            /* System24 exact colors */
+            --c-black: #292929;
+            --c-red: #e6837e;
+            --c-green: #6ec9a6;
+            --c-yellow: #c2b264;
+            --c-blue: #6fb8d9;
+            --c-magenta: #cd91d8;
+            --c-cyan: #6ec9a6;
+            --c-white: #cfcfcf;
+
+            --c-red-intense: #f59691;
+            --c-green-intense: #82deb9;
+            --c-yellow-intense: #d7c678;
+            --c-blue-intense: #82c8e6;
+            --c-magenta-intense: #dca5e6;
+            --c-cyan-intense: #82deb9;
+
+            --card-bg: rgba(35, 35, 35, 0.7);
+            --card-hover: rgba(45, 45, 45, 0.95);
+            --status-online: #6ec9a6;
+            --status-idle: #c2b264;
+            --status-dnd: #e6837e;
+            --status-offline: #808080;
         }
 
         * {
@@ -55,9 +67,9 @@
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--term-fg);
+            font-family: "DM Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -68,432 +80,56 @@
             overflow-x: hidden;
         }
 
-        /* Ambient animated glow background */
+        /* Ambient subtle glow matching System24 cyan & magenta */
         .ambient-glow {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(56, 189, 248, 0.12) 0%, rgba(16, 185, 129, 0.08) 40%, transparent 70%);
-            filter: blur(80px);
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, rgba(110, 201, 166, 0.08) 0%, rgba(205, 145, 216, 0.05) 45%, transparent 70%);
+            filter: blur(100px);
             z-index: 0;
             pointer-events: none;
-            animation: pulseGlow 8s ease-in-out infinite alternate;
+            animation: pulseGlow 12s ease-in-out infinite alternate;
         }
 
         @keyframes pulseGlow {
             0% {
-                transform: translate(-50%, -50%) scale(0.9);
-                opacity: 0.7;
+                transform: translate(-50%, -50%) scale(0.92);
+                opacity: 0.5;
             }
 
             100% {
-                transform: translate(-50%, -50%) scale(1.15);
-                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.12);
+                opacity: 0.9;
             }
         }
 
-        .container {
-            max-width: 440px;
+        /* Full Terminal Window (System24 Styled) */
+        .terminal-container {
+            max-width: 680px;
             width: 100%;
-            text-align: center;
+            background: var(--term-bg);
+            border: 1px solid var(--term-border);
+            border-radius: 10px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 25px rgba(110, 201, 166, 0.05);
+            backdrop-filter: blur(16px);
+            overflow: hidden;
             position: relative;
             z-index: 1;
-        }
-
-        /* Top status pills row */
-        .status-row {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 20px;
-            font-size: 12px;
-        }
-
-        .pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 4px 12px;
-            border-radius: 9999px;
-            background: var(--badge-bg);
-            border: 1px solid var(--border-color);
-            backdrop-filter: blur(8px);
-            color: var(--text-muted);
-            font-size: 12px;
-            text-decoration: none;
-        }
-
-        .pill-btn {
-            cursor: pointer;
-            transition: border-color 0.2s, background 0.2s, color 0.2s;
-        }
-
-        .pill-btn:hover {
-            border-color: var(--border-hover);
-            color: var(--text-main);
-            background: var(--card-hover);
-        }
-
-        .pill-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--accent);
-            box-shadow: 0 0 6px var(--accent);
-        }
-
-        .pfp-wrapper {
-            position: relative;
-            width: 108px;
-            height: 108px;
-            margin: 0 auto 16px;
-        }
-
-        .pfp {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            overflow: hidden;
-            border: 2px solid var(--border-color);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-            background: var(--card-bg);
-            transition: transform 0.25s ease, border-color 0.25s ease;
-        }
-
-        .pfp:hover {
-            transform: scale(1.05);
-            border-color: var(--accent);
-        }
-
-        .pfp img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-
-        .status-indicator {
-            position: absolute;
-            bottom: 4px;
-            right: 4px;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: var(--status-offline);
-            border: 3px solid var(--bg-color);
-            box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
-            transition: background-color 0.3s ease;
-        }
-
-        h1 {
-            margin: 0 0 6px;
-            font-size: 24px;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-        }
-
-        /* Click to copy handle badge */
-        .handle-btn {
-            background: transparent;
-            border: none;
-            color: var(--accent);
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            padding: 4px 10px;
-            border-radius: 6px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            transition: background 0.2s, color 0.2s;
-            margin-bottom: 12px;
-        }
-
-        .handle-btn:hover {
-            background: rgba(56, 189, 248, 0.1);
-        }
-
-        .handle-btn svg {
-            width: 14px;
-            height: 14px;
-            opacity: 0.7;
-        }
-
-        .copied-tooltip {
-            font-size: 11px;
-            color: #22c55e;
-            display: none;
-        }
-
-        .bio {
-            color: var(--text-muted);
-            margin: 0 0 16px;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        /* Discord Activity Card (Lanyard) */
-        .activity-card {
-            display: none;
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 12px 16px;
-            margin-bottom: 16px;
-            text-align: left;
-            font-size: 13px;
-        }
-
-        .activity-header {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--accent);
-            margin-bottom: 4px;
-            font-weight: 600;
-        }
-
-        .activity-details {
-            color: var(--text-main);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            justify-content: center;
-            margin-bottom: 22px;
-        }
-
-        .tag {
-            background: var(--badge-bg);
-            color: var(--badge-text);
-            font-size: 12px;
-            padding: 4px 10px;
-            border-radius: 9999px;
-            border: 1px solid var(--border-color);
-            backdrop-filter: blur(6px);
-        }
-
-        .links {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            margin-bottom: 18px;
-        }
-
-        .link-card {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            color: var(--text-main);
-            text-decoration: none;
-            padding: 14px 18px;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .link-content {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .link-card svg {
-            width: 20px;
-            height: 20px;
-            fill: currentColor;
-            flex-shrink: 0;
-        }
-
-        .arrow {
-            opacity: 0.4;
-            transition: opacity 0.2s ease, transform 0.2s ease;
-        }
-
-        .link-card:hover {
-            background: var(--card-hover);
-            border-color: var(--border-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-        }
-
-        .link-card:hover .arrow {
-            opacity: 1;
-            transform: translateX(4px);
-        }
-
-        .link-card:focus-visible {
-            outline: 2px solid var(--accent);
-            outline-offset: 2px;
-        }
-
-        /* Action bar for extra tools (Terminal modal trigger) */
-        .action-bar {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 18px;
-        }
-
-        .terminal-btn {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            backdrop-filter: blur(12px);
-            color: var(--accent);
-            font-family: inherit;
-            font-size: 13px;
-            font-weight: 500;
-            padding: 10px 16px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background 0.2s, border-color 0.2s, transform 0.2s;
-        }
-
-        .terminal-btn:hover {
-            background: var(--card-hover);
-            border-color: var(--border-hover);
-            transform: translateY(-1px);
-        }
-
-        .terminal-btn svg {
-            width: 16px;
-            height: 16px;
-        }
-
-        /* Collapsible Hardware / Specs drawer */
-        details.specs-drawer {
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            overflow: hidden;
-            text-align: left;
-            transition: border-color 0.2s;
-        }
-
-        details.specs-drawer[open] {
-            border-color: var(--border-hover);
-        }
-
-        summary.specs-summary {
-            padding: 12px 18px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-muted);
-            list-style: none;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            user-select: none;
-        }
-
-        summary.specs-summary::-webkit-details-marker {
-            display: none;
-        }
-
-        summary.specs-summary:hover {
-            color: var(--text-main);
-        }
-
-        .specs-content {
-            padding: 0 18px 14px;
-            font-size: 12px;
-            color: var(--text-muted);
-            border-top: 1px solid var(--border-color);
-            margin-top: 4px;
-            padding-top: 10px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px 12px;
-        }
-
-        .spec-item {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .spec-label {
-            color: #64748b;
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .spec-val {
-            color: var(--text-main);
-            font-weight: 500;
-        }
-
-        /* Fastfetch / Terminal Modal */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(6px);
-            z-index: 100;
-            justify-content: center;
-            align-items: center;
-            padding: 16px;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .terminal-window {
-            background: #0d1117;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 12px;
-            max-width: 640px;
-            width: 100%;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-            animation: modalFadeIn 0.2s ease-out;
-            text-align: left;
-        }
-
-        @keyframes modalFadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.96);
-            }
-
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
         }
 
         .terminal-header {
-            background: #161b22;
-            padding: 10px 14px;
+            background: var(--term-header);
+            padding: 10px 16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            border-bottom: 1px solid var(--term-border);
             user-select: none;
         }
 
@@ -506,86 +142,359 @@
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            cursor: pointer;
         }
 
         .dot-close {
-            background: #ff5f56;
+            background: var(--c-red);
         }
 
         .dot-min {
-            background: #ffbd2e;
+            background: var(--c-yellow);
         }
 
         .dot-max {
-            background: #27c93f;
+            background: var(--c-green);
         }
 
         .terminal-title {
             font-size: 12px;
-            color: #8b949e;
+            color: var(--term-fg-faint);
+            letter-spacing: 0.02em;
+        }
+
+        .terminal-status {
+            font-size: 11px;
+            color: var(--c-green);
         }
 
         .terminal-body {
-            padding: 16px;
-            font-size: 13px;
-            line-height: 1.6;
-            color: #e6edf3;
-            max-height: 75vh;
-            overflow-y: auto;
-        }
-
-        .term-prompt {
-            color: var(--term-green);
-            margin-bottom: 12px;
-            font-weight: 600;
-        }
-
-        .term-prompt span {
-            color: var(--term-cyan);
-        }
-
-        .term-entry {
-            margin-bottom: 4px;
+            padding: 24px;
             display: flex;
-            gap: 8px;
+            flex-direction: column;
+            gap: 20px;
         }
 
-        .term-key {
-            color: var(--term-magenta);
-            font-weight: 600;
-            min-width: 130px;
+        /* Profile Block inside Terminal */
+        .profile-row {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+        }
+
+        .pfp-wrapper {
+            position: relative;
+            width: 88px;
+            height: 88px;
             flex-shrink: 0;
         }
 
-        .term-val {
-            color: #e6edf3;
+        .pfp {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid var(--term-border);
+            background: #111;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+            transition: transform 0.2s, border-color 0.2s;
         }
 
-        .term-section {
-            color: var(--term-yellow);
+        .pfp:hover {
+            transform: scale(1.04);
+            border-color: var(--c-cyan);
+        }
+
+        .pfp img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .status-indicator {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--status-offline);
+            border: 2px solid #1c1c1c;
+            transition: background-color 0.3s ease;
+        }
+
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            text-align: left;
+            min-width: 0;
+        }
+
+        .profile-title {
+            font-size: 20px;
             font-weight: 700;
-            margin: 10px 0 6px;
-            border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
-            padding-bottom: 2px;
+            color: var(--term-fg-intense);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .copy-handle {
+            background: rgba(111, 184, 217, 0.1);
+            border: 1px solid rgba(111, 184, 217, 0.25);
+            color: var(--c-blue);
+            font-family: inherit;
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s, border-color 0.2s;
+            margin-top: 2px;
+            width: fit-content;
+        }
+
+        .copy-handle:hover {
+            background: rgba(111, 184, 217, 0.2);
+            border-color: var(--c-blue-intense);
+        }
+
+        .copied-tooltip {
+            font-size: 11px;
+            color: var(--c-green);
+            display: none;
+        }
+
+        .bio-text {
+            color: var(--term-fg-faint);
+            font-size: 13px;
+            margin: 4px 0 0;
+            line-height: 1.5;
+        }
+
+        /* Activity / Listening box */
+        .activity-card {
+            display: none;
+            background: var(--card-bg);
+            border: 1px solid var(--term-border);
+            border-left: 3px solid var(--c-green);
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 12px;
+            text-align: left;
+        }
+
+        .activity-header {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--c-green);
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .activity-details {
+            color: var(--term-fg-intense);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Fish / Starship Prompt Line */
+        .cmd-line {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        .prompt-user {
+            color: var(--c-green);
+        }
+
+        .prompt-at {
+            color: var(--term-fg-faint);
+        }
+
+        .prompt-host {
+            color: var(--c-blue);
+        }
+
+        .prompt-dir {
+            color: var(--term-fg-faint);
+        }
+
+        .prompt-cmd {
+            color: var(--c-magenta);
+            font-weight: 700;
+        }
+
+        /* Fastfetch Box */
+        .fastfetch-box {
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 14px 16px;
+            text-align: left;
+            font-size: 12.5px;
+            line-height: 1.6;
+        }
+
+        .fetch-header {
+            color: var(--c-yellow);
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin: 8px 0 4px;
+        }
+
+        .fetch-header:first-child {
+            margin-top: 0;
+        }
+
+        .fetch-entry {
+            display: flex;
+            gap: 10px;
+        }
+
+        .fetch-key {
+            color: var(--c-magenta);
+            font-weight: 600;
+            min-width: 120px;
+            flex-shrink: 0;
+        }
+
+        .fetch-val {
+            color: var(--term-fg-intense);
         }
 
         .palette-row {
             display: flex;
             gap: 4px;
-            margin-top: 14px;
+            margin-top: 12px;
+            padding-top: 8px;
+            border-top: 1px dashed rgba(255, 255, 255, 0.08);
         }
 
         .color-block {
-            width: 22px;
-            height: 14px;
+            width: 20px;
+            height: 12px;
             border-radius: 2px;
         }
 
+        /* Language Badges */
+        .lang-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .lang-tag {
+            background: var(--card-bg);
+            border: 1px solid var(--term-border);
+            color: var(--c-cyan);
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 4px;
+        }
+
+        /* Links section */
+        .links-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .term-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--card-bg);
+            border: 1px solid var(--term-border);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: var(--term-fg);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: background 0.2s, border-color 0.2s, transform 0.2s, color 0.2s;
+        }
+
+        .link-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .term-link svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+            flex-shrink: 0;
+        }
+
+        .term-link:hover {
+            background: var(--card-hover);
+            border-color: var(--c-blue);
+            transform: translateY(-2px);
+            color: var(--term-fg-intense);
+        }
+
+        .term-link:hover .arrow {
+            color: var(--c-blue);
+            transform: translateX(3px);
+        }
+
+        .term-link:focus-visible {
+            outline: 2px solid var(--c-blue);
+            outline-offset: 2px;
+        }
+
+        .arrow {
+            color: var(--term-fg-faint);
+            transition: color 0.2s, transform 0.2s;
+        }
+
         footer {
-            margin-top: 24px;
-            font-size: 12px;
-            color: #64748b;
+            border-top: 1px solid var(--term-border);
+            background: #232323;
+            padding: 10px 16px;
+            font-size: 11px;
+            color: var(--term-fg-faint);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        @media (max-width: 600px) {
+            .profile-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .links-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .fetch-entry {
+                flex-direction: column;
+                gap: 2px;
+            }
+
+            .fetch-key {
+                min-width: unset;
+            }
         }
     </style>
 </head>
@@ -593,216 +502,189 @@
 <body>
     <div class="ambient-glow"></div>
 
-    <main class="container">
-        <!-- Status / Location pill row -->
-        <div class="status-row">
-            <div class="pill">
-                <span class="pill-dot"></span>
-                <span id="local-clock">UK &bull; --:--</span>
+    <main class="terminal-container">
+        <!-- Terminal Titlebar -->
+        <div class="terminal-header">
+            <div class="terminal-dots">
+                <div class="dot dot-close"></div>
+                <div class="dot dot-min"></div>
+                <div class="dot dot-max"></div>
             </div>
-            <button class="pill pill-btn" id="open-term-pill" title="Open terminal preview">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="4 17 10 11 4 5"></polyline>
-                    <line x1="12" y1="19" x2="20" y2="19"></line>
-                </svg>
-                <span>fastfetch</span>
-            </button>
+            <div class="terminal-title">ashley@cachyos-desktop-ashley: ~</div>
+            <div class="terminal-status" id="live-clock">UK &bull; --:--</div>
         </div>
 
-        <div class="pfp-wrapper">
-            <div class="pfp">
-                <img src="https://github.com/DesireThings.png" alt="Profile Picture" width="108" height="108">
-            </div>
-            <div class="status-indicator" id="discord-indicator" title="Discord Status"></div>
-        </div>
-
-        <h1>Remi / Ashley</h1>
-
-        <button class="handle-btn" id="copy-btn" title="Click to copy Discord handle" aria-label="Copy Discord handle">
-            <span id="handle-text">@DesireThings &bull; desire_things</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-            </svg>
-            <span class="copied-tooltip" id="copied-badge">Copied!</span>
-        </button>
-
-        <p class="bio">
-            Linux enthusiast & CachyOS daily driver. osu! player, Torii Nova contributor, and community admin.
-        </p>
-
-        <!-- Live Activity Card (populated dynamically if active) -->
-        <div class="activity-card" id="activity-box">
-            <div class="activity-header" id="activity-label">Playing</div>
-            <div class="activity-details" id="activity-name">osu!</div>
-        </div>
-
-        <div class="tags">
-            <span class="tag">CachyOS</span>
-            <span class="tag">osu!lazer</span>
-            <span class="tag">Torii Nova</span>
-            <span class="tag">Python / C#</span>
-        </div>
-
-        <nav class="links">
-            <a class="link-card" href="https://github.com/DesireThings" target="_blank" rel="noopener noreferrer">
-                <div class="link-content">
-                    <!-- GitHub icon -->
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <path
-                            d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
-                    </svg>
-                    <span>GitHub</span>
+        <div class="terminal-body">
+            <!-- Profile Info Banner -->
+            <div class="profile-row">
+                <div class="pfp-wrapper">
+                    <div class="pfp">
+                        <img src="https://github.com/DesireThings.png" alt="Profile Picture" width="88" height="88">
+                    </div>
+                    <div class="status-indicator" id="discord-indicator" title="Discord Status"></div>
                 </div>
-                <span class="arrow">&rarr;</span>
-            </a>
 
-            <a class="link-card" href="https://osu.ppy.sh/users/18473778" target="_blank" rel="noopener noreferrer">
-                <div class="link-content">
-                    <!-- osu! circle icon -->
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" />
-                        <circle cx="12" cy="12" r="5" fill="currentColor" />
-                    </svg>
-                    <span>osu! Profile</span>
-                </div>
-                <span class="arrow">&rarr;</span>
-            </a>
+                <div class="profile-info">
+                    <h1 class="profile-title">
+                        <span>Remi / Ashley</span>
+                    </h1>
 
-            <a class="link-card" href="https://torii-web.shikkesora.com/users/96" target="_blank"
-                rel="noopener noreferrer">
-                <div class="link-content">
-                    <!-- Torii / Gaming icon -->
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <path
-                            d="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-10 7H9v2H7v-2H5v-2h2V9h2v2h2v2zm4.5 1.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm3-3c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" />
-                    </svg>
-                    <span>Torii Profile</span>
-                </div>
-                <span class="arrow">&rarr;</span>
-            </a>
+                    <button class="copy-handle" id="copy-btn" title="Click to copy Discord handle"
+                        aria-label="Copy Discord handle">
+                        <span>@DesireThings &bull; desire_things</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        <span class="copied-tooltip" id="copied-badge">Copied!</span>
+                    </button>
 
-            <a class="link-card" href="https://discord.gg/zeuKQquCSE" target="_blank" rel="noopener noreferrer">
-                <div class="link-content">
-                    <!-- Discord icon -->
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <path
-                            d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
-                    </svg>
-                    <span>Discord Community</span>
-                </div>
-                <span class="arrow">&rarr;</span>
-            </a>
-        </nav>
-
-        <!-- Fastfetch Terminal button -->
-        <div class="action-bar">
-            <button class="terminal-btn" id="open-term-btn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round">
-                    <polyline points="4 17 10 11 4 5"></polyline>
-                    <line x1="12" y1="19" x2="20" y2="19"></line>
-                </svg>
-                <span>Preview fastfetch terminal</span>
-            </button>
-        </div>
-
-        <!-- Hardware & Rig Specs Drawer -->
-        <details class="specs-drawer">
-            <summary class="specs-summary">
-                <span>System & Hardware</span>
-                <span style="font-size: 11px; opacity: 0.7;">view specs &darr;</span>
-            </summary>
-            <div class="specs-content">
-                <div class="spec-item">
-                    <span class="spec-label">OS</span>
-                    <span class="spec-val">CachyOS (Arch)</span>
-                </div>
-                <div class="spec-item">
-                    <span class="spec-label">CPU</span>
-                    <span class="spec-val">i5-13600KF</span>
-                </div>
-                <div class="spec-item">
-                    <span class="spec-label">GPU</span>
-                    <span class="spec-val">RX 9070 XT 16GB</span>
-                </div>
-                <div class="spec-item">
-                    <span class="spec-label">RAM</span>
-                    <span class="spec-val">32GB DDR4 3200</span>
-                </div>
-                <div class="spec-item">
-                    <span class="spec-label">Shell</span>
-                    <span class="spec-val">fish / starship</span>
-                </div>
-                <div class="spec-item">
-                    <span class="spec-label">Display</span>
-                    <span class="spec-val">1440p 180Hz</span>
+                    <p class="bio-text">
+                        Linux enthusiast & CachyOS daily driver. osu! player, Torii Nova contributor, and community
+                        administrator.
+                    </p>
                 </div>
             </div>
-        </details>
 
+            <!-- Discord Activity Card (shown if listening or playing) -->
+            <div class="activity-card" id="activity-box">
+                <div class="activity-header" id="activity-label">Playing</div>
+                <div class="activity-details" id="activity-name">osu!</div>
+            </div>
+
+            <!-- Fastfetch Section -->
+            <div>
+                <div class="cmd-line">
+                    <span class="prompt-user">ashley</span><span class="prompt-at">@</span><span
+                        class="prompt-host">cachyos</span>
+                    <span class="prompt-dir">~></span>
+                    <span class="prompt-cmd">fastfetch</span>
+                </div>
+
+                <div class="fastfetch-box">
+                    <div class="fetch-header">── Software ──</div>
+                    <div class="fetch-entry"><span class="fetch-key">OS:</span><span class="fetch-val">CachyOS x86_64
+                            (Linux 7.2.9-2-cachyos)</span></div>
+                    <div class="fetch-entry"><span class="fetch-key">Desktop:</span><span class="fetch-val">KDE Plasma 6
+                            (Wayland) &bull; KWin</span></div>
+                    <div class="fetch-entry"><span class="fetch-key">Theme:</span><span class="fetch-val">MateriaDark
+                            (System24) &bull; Klassy</span></div>
+                    <div class="fetch-entry"><span class="fetch-key">Shell:</span><span class="fetch-val">fish &bull;
+                            starship prompt</span></div>
+                    <div class="fetch-entry"><span class="fetch-key">Terminal:</span><span class="fetch-val">Konsole
+                            &bull; antigravity-ide</span></div>
+
+                    <div class="fetch-header">── Hardware ──</div>
+                    <div class="fetch-entry"><span class="fetch-key">Motherboard:</span><span class="fetch-val">MSI MAG
+                            Z690 TOMAHAWK WIFI DDR4</span></div>
+                    <div class="fetch-entry"><span class="fetch-key">CPU:</span><span class="fetch-val">13th Gen Intel
+                            Core i5-13600KF (20 threads @ 5.10 GHz)</span></div>
+                    <div class="fetch-entry"><span class="fetch-key">GPU:</span><span class="fetch-val">AMD Radeon RX
+                            9070 XT (16 GB)</span></div>
+                    <div class="fetch-entry"><span class="fetch-key">Memory:</span><span class="fetch-val">32 GB DDR4 @
+                            3200 MT/s</span></div>
+                    <div class="fetch-entry"><span class="fetch-key">Displays:</span><span class="fetch-val">MAG 274QRFW
+                            (1440p @ 180Hz) &bull; E201W (900p @ 60Hz)</span></div>
+                    <div class="fetch-entry"><span class="fetch-key">Peripherals:</span><span class="fetch-val">Wooting
+                            Two HE &bull; OpenTabletDriver (Wacom Intuos)</span></div>
+
+                    <div class="palette-row">
+                        <div class="color-block" style="background:#292929"></div>
+                        <div class="color-block" style="background:#e6837e"></div>
+                        <div class="color-block" style="background:#6ec9a6"></div>
+                        <div class="color-block" style="background:#c2b264"></div>
+                        <div class="color-block" style="background:#6fb8d9"></div>
+                        <div class="color-block" style="background:#cd91d8"></div>
+                        <div class="color-block" style="background:#6ec9a6"></div>
+                        <div class="color-block" style="background:#cfcfcf"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Languages / Tech Stack Section -->
+            <div>
+                <div class="cmd-line">
+                    <span class="prompt-user">ashley</span><span class="prompt-at">@</span><span
+                        class="prompt-host">cachyos</span>
+                    <span class="prompt-dir">~></span>
+                    <span class="prompt-cmd">cat languages.txt</span>
+                </div>
+                <div class="lang-tags">
+                    <span class="lang-tag">Python</span>
+                    <span class="lang-tag">C# (.NET)</span>
+                    <span class="lang-tag">TypeScript / JavaScript</span>
+                    <span class="lang-tag">HTML5 & CSS3</span>
+                    <span class="lang-tag">Shell / fish / bash</span>
+                </div>
+            </div>
+
+            <!-- Links Section -->
+            <div>
+                <div class="cmd-line" style="margin-bottom: 8px;">
+                    <span class="prompt-user">ashley</span><span class="prompt-at">@</span><span
+                        class="prompt-host">cachyos</span>
+                    <span class="prompt-dir">~></span>
+                    <span class="prompt-cmd">ls ./links/</span>
+                </div>
+
+                <div class="links-grid">
+                    <a class="term-link" href="https://github.com/DesireThings" target="_blank"
+                        rel="noopener noreferrer">
+                        <div class="link-left">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path
+                                    d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                            </svg>
+                            <span>github</span>
+                        </div>
+                        <span class="arrow">&rarr;</span>
+                    </a>
+
+                    <a class="term-link" href="https://osu.ppy.sh/users/18473778" target="_blank"
+                        rel="noopener noreferrer">
+                        <div class="link-left">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" />
+                                <circle cx="12" cy="12" r="5" fill="currentColor" />
+                            </svg>
+                            <span>osu-profile</span>
+                        </div>
+                        <span class="arrow">&rarr;</span>
+                    </a>
+
+                    <a class="term-link" href="https://torii-web.shikkesora.com/users/96" target="_blank"
+                        rel="noopener noreferrer">
+                        <div class="link-left">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path
+                                    d="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-10 7H9v2H7v-2H5v-2h2V9h2v2h2v2zm4.5 1.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm3-3c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" />
+                            </svg>
+                            <span>torii-profile</span>
+                        </div>
+                        <span class="arrow">&rarr;</span>
+                    </a>
+
+                    <a class="term-link" href="https://discord.gg/zeuKQquCSE" target="_blank" rel="noopener noreferrer">
+                        <div class="link-left">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path
+                                    d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
+                            </svg>
+                            <span>torii-discord</span>
+                        </div>
+                        <span class="arrow">&rarr;</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Terminal Footer -->
         <footer>
             <span>&copy; Remi / Ashley</span>
+            <span>tty1 &bull; System24 &bull; UTF-8</span>
         </footer>
     </main>
-
-    <!-- Terminal Modal -->
-    <div class="modal-overlay" id="term-modal" role="dialog" aria-modal="true" aria-label="Terminal Preview">
-        <div class="terminal-window">
-            <div class="terminal-header">
-                <div class="terminal-dots">
-                    <div class="dot dot-close" id="close-term-dot" title="Close"></div>
-                    <div class="dot dot-min"></div>
-                    <div class="dot dot-max"></div>
-                </div>
-                <div class="terminal-title">ashley@cachyos-desktop-ashley ~ fastfetch</div>
-                <div style="width: 44px;"></div>
-            </div>
-            <div class="terminal-body">
-                <div class="term-prompt">ashley<span>@cachyos-desktop-ashley</span> ~> fastfetch</div>
-
-                <div class="term-section">── Software ──</div>
-                <div class="term-entry"><span class="term-key">OS:</span><span class="term-val">CachyOS x86_64</span>
-                </div>
-                <div class="term-entry"><span class="term-key">Kernel:</span><span class="term-val">Linux
-                        (cachyos-bore)</span></div>
-                <div class="term-entry"><span class="term-key">Desktop:</span><span class="term-val">KDE Plasma
-                        (Wayland)</span></div>
-                <div class="term-entry"><span class="term-key">Shell:</span><span class="term-val">fish with
-                        starship</span></div>
-                <div class="term-entry"><span class="term-key">Terminal:</span><span class="term-val">Konsole /
-                        antigravity</span></div>
-                <div class="term-entry"><span class="term-key">Editor:</span><span class="term-val">antigravity-ide
-                        (AUR)</span></div>
-
-                <div class="term-section">── Hardware ──</div>
-                <div class="term-entry"><span class="term-key">Board:</span><span class="term-val">MAG Z690 TOMAHAWK
-                        WIFI DDR4</span></div>
-                <div class="term-entry"><span class="term-key">CPU:</span><span class="term-val">13th Gen Intel Core
-                        i5-13600KF (20 threads)</span></div>
-                <div class="term-entry"><span class="term-key">GPU:</span><span class="term-val">AMD Radeon RX 9070 XT
-                        (16 GB)</span></div>
-                <div class="term-entry"><span class="term-key">Memory:</span><span class="term-val">32 GB DDR4 @ 3200
-                        MT/s</span></div>
-                <div class="term-entry"><span class="term-key">Displays:</span><span class="term-val">MAG 274QRFW (1440p
-                        @ 180Hz) + E201W (900p @ 60Hz)</span></div>
-                <div class="term-entry"><span class="term-key">Peripherals:</span><span class="term-val">Wooting Two HE
-                        &bull; OpenTabletDriver (Wacom Intuos)</span></div>
-
-                <div class="palette-row">
-                    <div class="color-block" style="background:#0d1117"></div>
-                    <div class="color-block" style="background:#f87171"></div>
-                    <div class="color-block" style="background:#4ade80"></div>
-                    <div class="color-block" style="background:#fde047"></div>
-                    <div class="color-block" style="background:#60a5fa"></div>
-                    <div class="color-block" style="background:#c084fc"></div>
-                    <div class="color-block" style="background:#38bdf8"></div>
-                    <div class="color-block" style="background:#f1f5f9"></div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <script>
         // Live UK Clock
@@ -815,7 +697,7 @@
                     minute: '2-digit',
                     hour12: false
                 }).format(now);
-                const clockEl = document.getElementById('local-clock');
+                const clockEl = document.getElementById('live-clock');
                 if (clockEl) {
                     clockEl.textContent = `UK \u2022 ${timeString}`;
                 }
@@ -838,33 +720,6 @@
                 } catch (e) { }
             });
         }
-
-        // Fastfetch Terminal Modal Toggle
-        const termModal = document.getElementById('term-modal');
-        const openTermBtn = document.getElementById('open-term-btn');
-        const openTermPill = document.getElementById('open-term-pill');
-        const closeTermDot = document.getElementById('close-term-dot');
-
-        function openModal() {
-            termModal.classList.add('active');
-        }
-        function closeModal() {
-            termModal.classList.remove('active');
-        }
-
-        if (openTermBtn) openTermBtn.addEventListener('click', openModal);
-        if (openTermPill) openTermPill.addEventListener('click', openModal);
-        if (closeTermDot) closeTermDot.addEventListener('click', closeModal);
-        if (termModal) {
-            termModal.addEventListener('click', (e) => {
-                if (e.target === termModal) closeModal();
-            });
-        }
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && termModal && termModal.classList.contains('active')) {
-                closeModal();
-            }
-        });
 
         // Live Discord Status (Lanyard)
         const DISCORD_USER_ID = '882747349615652924';
