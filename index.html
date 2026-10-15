@@ -1,84 +1,267 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@YourUsername</title>
+    <title>Remi / Ashley (@DesireThings)</title>
+    <meta name="description"
+        content="Linux enthusiast, CachyOS user, osu! player, Torii Nova contributor and administrator.">
+    <meta name="theme-color" content="#10b981">
+
+    <!-- Open Graph / Discord embeds -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://desirethings.github.io/">
+    <meta property="og:title" content="Remi / Ashley (@DesireThings)">
+    <meta property="og:description"
+        content="Linux enthusiast, CachyOS user, osu! player, Torii Nova contributor and administrator.">
+    <meta property="og:image" content="https://github.com/DesireThings.png">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Remi / Ashley (@DesireThings)">
+    <meta name="twitter:description"
+        content="Linux enthusiast, CachyOS user, osu! player, Torii Nova contributor and administrator.">
+    <meta name="twitter:image" content="https://github.com/DesireThings.png">
+
+    <link rel="icon" type="image/png" href="https://github.com/DesireThings.png">
+
     <style>
-        body { 
-            background-color: #0d0d0d; 
-            color: #ffffff; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
-            margin: 0; 
-            text-align: center; 
+        :root {
+            --bg-color: #0b0f14;
+            --card-bg: #131920;
+            --card-hover: #1c2530;
+            --border-color: #232d3b;
+            --border-hover: #3b82f6;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --badge-bg: #1e293b;
+            --badge-text: #cbd5e1;
         }
-        .container { 
-            max-width: 400px; 
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 24px 16px;
+        }
+
+        .container {
+            max-width: 440px;
             width: 100%;
-            padding: 20px; 
+            text-align: center;
         }
-        .pfp { 
-            width: 110px; 
-            height: 110px; 
-            border-radius: 50%; 
-            background: #222; 
-            margin: 0 auto 20px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
+
+        .pfp {
+            width: 104px;
+            height: 104px;
+            border-radius: 50%;
+            margin: 0 auto 16px;
             overflow: hidden;
-            border: 2px solid #333;
+            border: 2px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            background: var(--card-bg);
+            transition: transform 0.25s ease, border-color 0.25s ease;
         }
-        .pfp img { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
+
+        .pfp:hover {
+            transform: scale(1.04);
+            border-color: var(--accent);
         }
-        h1 { 
-            margin: 0 0 10px; 
-            font-size: 24px; 
-            letter-spacing: 1px;
+
+        .pfp img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
         }
-        p { 
-            color: #888; 
-            margin: 0 0 30px; 
+
+        h1 {
+            margin: 0 0 6px;
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .handle {
+            color: var(--accent);
             font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 14px;
         }
-        a { 
-            display: block; 
-            background: #1a1a1a; 
-            color: #fff; 
-            text-decoration: none; 
-            padding: 15px; 
-            margin-bottom: 12px; 
-            border-radius: 8px; 
-            border: 1px solid #333; 
-            transition: 0.3s; 
+
+        .bio {
+            color: var(--text-muted);
+            margin: 0 0 16px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .tag {
+            background: var(--badge-bg);
+            color: var(--badge-text);
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            border: 1px solid var(--border-color);
+        }
+
+        .links {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .link-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--card-bg);
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 14px 18px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+            font-size: 14px;
             font-weight: 500;
         }
-        a:hover { 
-            background: #333; 
-            border-color: #555; 
-            transform: scale(1.02);
+
+        .link-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .link-card svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+            flex-shrink: 0;
+        }
+
+        .arrow {
+            opacity: 0.4;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .link-card:hover {
+            background: var(--card-hover);
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+        }
+
+        .link-card:hover .arrow {
+            opacity: 1;
+            transform: translateX(3px);
+        }
+
+        .link-card:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        footer {
+            margin-top: 28px;
+            font-size: 12px;
+            color: #64748b;
         }
     </style>
 </head>
+
 <body>
-    <div class="container">
+    <main class="container">
         <div class="pfp">
-            <!-- Replace the src below with a link to your own image later -->
-            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=placeholder" alt="Profile Picture">
+            <img src="https://github.com/DesireThings.png" alt="Profile Picture" width="104" height="104">
         </div>
-        <h1>@YourUsername</h1>
-        <p>Just a chill guy on the internet.</p>
-        
-        <a href="https://twitter.com/yourhandle" target="_blank">Twitter / X</a>
-        <a href="https://discord.gg/yourinvite" target="_blank">Discord Server</a>
-        <a href="https://github.com/yourhandle" target="_blank">GitHub</a>
-    </div>
+
+        <h1>Remi / Ashley</h1>
+        <div class="handle">@DesireThings &bull; desire_things</div>
+
+        <p class="bio">
+            Linux enthusiast & CachyOS daily driver. osu! player, Torii Nova contributor, and community admin.
+        </p>
+
+        <div class="tags">
+            <span class="tag">CachyOS</span>
+            <span class="tag">osu!lazer</span>
+            <span class="tag">Torii Nova</span>
+            <span class="tag">Python / C#</span>
+        </div>
+
+        <nav class="links">
+            <a class="link-card" href="https://github.com/DesireThings" target="_blank" rel="noopener noreferrer">
+                <div class="link-content">
+                    <!-- GitHub icon -->
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                            d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                    </svg>
+                    <span>GitHub</span>
+                </div>
+                <span class="arrow">&rarr;</span>
+            </a>
+
+            <a class="link-card" href="https://osu.ppy.sh/users/18473778" target="_blank" rel="noopener noreferrer">
+                <div class="link-content">
+                    <!-- osu! circle icon -->
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" />
+                        <circle cx="12" cy="12" r="5" fill="currentColor" />
+                    </svg>
+                    <span>osu! Profile</span>
+                </div>
+                <span class="arrow">&rarr;</span>
+            </a>
+
+            <a class="link-card" href="https://torii-web.shikkesora.com/users/96" target="_blank"
+                rel="noopener noreferrer">
+                <div class="link-content">
+                    <!-- Torii / Gaming icon -->
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                            d="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-10 7H9v2H7v-2H5v-2h2V9h2v2h2v2zm4.5 1.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm3-3c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" />
+                    </svg>
+                    <span>Torii Profile</span>
+                </div>
+                <span class="arrow">&rarr;</span>
+            </a>
+
+            <a class="link-card" href="https://discord.gg/zeuKQquCSE" target="_blank" rel="noopener noreferrer">
+                <div class="link-content">
+                    <!-- Discord icon -->
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                            d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
+                    </svg>
+                    <span>Discord Community</span>
+                </div>
+                <span class="arrow">&rarr;</span>
+            </a>
+        </nav>
+
+        <footer>
+            <span>&copy; Remi / Ashley</span>
+        </footer>
+    </main>
 </body>
+
 </html>
