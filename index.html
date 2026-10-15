@@ -43,6 +43,11 @@
             --status-idle: #eab308;
             --status-dnd: #ef4444;
             --status-offline: #64748b;
+            --term-green: #4ade80;
+            --term-cyan: #38bdf8;
+            --term-magenta: #c084fc;
+            --term-yellow: #fde047;
+            --term-red: #f87171;
         }
 
         * {
@@ -118,6 +123,18 @@
             backdrop-filter: blur(8px);
             color: var(--text-muted);
             font-size: 12px;
+            text-decoration: none;
+        }
+
+        .pill-btn {
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s, color 0.2s;
+        }
+
+        .pill-btn:hover {
+            border-color: var(--border-hover);
+            color: var(--text-main);
+            background: var(--card-hover);
         }
 
         .pill-dot {
@@ -269,7 +286,7 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            margin-bottom: 22px;
+            margin-bottom: 18px;
         }
 
         .link-card {
@@ -321,6 +338,43 @@
         .link-card:focus-visible {
             outline: 2px solid var(--accent);
             outline-offset: 2px;
+        }
+
+        /* Action bar for extra tools (Terminal modal trigger) */
+        .action-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .terminal-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(12px);
+            color: var(--accent);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 10px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, transform 0.2s;
+        }
+
+        .terminal-btn:hover {
+            background: var(--card-hover);
+            border-color: var(--border-hover);
+            transform: translateY(-1px);
+        }
+
+        .terminal-btn svg {
+            width: 16px;
+            height: 16px;
         }
 
         /* Collapsible Hardware / Specs drawer */
@@ -389,6 +443,145 @@
             font-weight: 500;
         }
 
+        /* Fastfetch / Terminal Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .terminal-window {
+            background: #0d1117;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            max-width: 640px;
+            width: 100%;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            animation: modalFadeIn 0.2s ease-out;
+            text-align: left;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.96);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .terminal-header {
+            background: #161b22;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            user-select: none;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .dot-close {
+            background: #ff5f56;
+        }
+
+        .dot-min {
+            background: #ffbd2e;
+        }
+
+        .dot-max {
+            background: #27c93f;
+        }
+
+        .terminal-title {
+            font-size: 12px;
+            color: #8b949e;
+        }
+
+        .terminal-body {
+            padding: 16px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #e6edf3;
+            max-height: 75vh;
+            overflow-y: auto;
+        }
+
+        .term-prompt {
+            color: var(--term-green);
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .term-prompt span {
+            color: var(--term-cyan);
+        }
+
+        .term-entry {
+            margin-bottom: 4px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .term-key {
+            color: var(--term-magenta);
+            font-weight: 600;
+            min-width: 130px;
+            flex-shrink: 0;
+        }
+
+        .term-val {
+            color: #e6edf3;
+        }
+
+        .term-section {
+            color: var(--term-yellow);
+            font-weight: 700;
+            margin: 10px 0 6px;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+            padding-bottom: 2px;
+        }
+
+        .palette-row {
+            display: flex;
+            gap: 4px;
+            margin-top: 14px;
+        }
+
+        .color-block {
+            width: 22px;
+            height: 14px;
+            border-radius: 2px;
+        }
+
         footer {
             margin-top: 24px;
             font-size: 12px;
@@ -407,9 +600,13 @@
                 <span class="pill-dot"></span>
                 <span id="local-clock">UK &bull; --:--</span>
             </div>
-            <div class="pill">
-                <span>CachyOS Linux</span>
-            </div>
+            <button class="pill pill-btn" id="open-term-pill" title="Open terminal preview">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="4 17 10 11 4 5"></polyline>
+                    <line x1="12" y1="19" x2="20" y2="19"></line>
+                </svg>
+                <span>fastfetch</span>
+            </button>
         </div>
 
         <div class="pfp-wrapper">
@@ -499,6 +696,18 @@
             </a>
         </nav>
 
+        <!-- Fastfetch Terminal button -->
+        <div class="action-bar">
+            <button class="terminal-btn" id="open-term-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <polyline points="4 17 10 11 4 5"></polyline>
+                    <line x1="12" y1="19" x2="20" y2="19"></line>
+                </svg>
+                <span>Preview fastfetch terminal</span>
+            </button>
+        </div>
+
         <!-- Hardware & Rig Specs Drawer -->
         <details class="specs-drawer">
             <summary class="specs-summary">
@@ -538,6 +747,63 @@
         </footer>
     </main>
 
+    <!-- Terminal Modal -->
+    <div class="modal-overlay" id="term-modal" role="dialog" aria-modal="true" aria-label="Terminal Preview">
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot dot-close" id="close-term-dot" title="Close"></div>
+                    <div class="dot dot-min"></div>
+                    <div class="dot dot-max"></div>
+                </div>
+                <div class="terminal-title">ashley@cachyos-desktop-ashley ~ fastfetch</div>
+                <div style="width: 44px;"></div>
+            </div>
+            <div class="terminal-body">
+                <div class="term-prompt">ashley<span>@cachyos-desktop-ashley</span> ~> fastfetch</div>
+
+                <div class="term-section">── Software ──</div>
+                <div class="term-entry"><span class="term-key">OS:</span><span class="term-val">CachyOS x86_64</span>
+                </div>
+                <div class="term-entry"><span class="term-key">Kernel:</span><span class="term-val">Linux
+                        (cachyos-bore)</span></div>
+                <div class="term-entry"><span class="term-key">Desktop:</span><span class="term-val">KDE Plasma
+                        (Wayland)</span></div>
+                <div class="term-entry"><span class="term-key">Shell:</span><span class="term-val">fish with
+                        starship</span></div>
+                <div class="term-entry"><span class="term-key">Terminal:</span><span class="term-val">Konsole /
+                        antigravity</span></div>
+                <div class="term-entry"><span class="term-key">Editor:</span><span class="term-val">antigravity-ide
+                        (AUR)</span></div>
+
+                <div class="term-section">── Hardware ──</div>
+                <div class="term-entry"><span class="term-key">Board:</span><span class="term-val">MAG Z690 TOMAHAWK
+                        WIFI DDR4</span></div>
+                <div class="term-entry"><span class="term-key">CPU:</span><span class="term-val">13th Gen Intel Core
+                        i5-13600KF (20 threads)</span></div>
+                <div class="term-entry"><span class="term-key">GPU:</span><span class="term-val">AMD Radeon RX 9070 XT
+                        (16 GB)</span></div>
+                <div class="term-entry"><span class="term-key">Memory:</span><span class="term-val">32 GB DDR4 @ 3200
+                        MT/s</span></div>
+                <div class="term-entry"><span class="term-key">Displays:</span><span class="term-val">MAG 274QRFW (1440p
+                        @ 180Hz) + E201W (900p @ 60Hz)</span></div>
+                <div class="term-entry"><span class="term-key">Peripherals:</span><span class="term-val">Wooting Two HE
+                        &bull; OpenTabletDriver (Wacom Intuos)</span></div>
+
+                <div class="palette-row">
+                    <div class="color-block" style="background:#0d1117"></div>
+                    <div class="color-block" style="background:#f87171"></div>
+                    <div class="color-block" style="background:#4ade80"></div>
+                    <div class="color-block" style="background:#fde047"></div>
+                    <div class="color-block" style="background:#60a5fa"></div>
+                    <div class="color-block" style="background:#c084fc"></div>
+                    <div class="color-block" style="background:#38bdf8"></div>
+                    <div class="color-block" style="background:#f1f5f9"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Live UK Clock
         function updateClock() {
@@ -572,6 +838,33 @@
                 } catch (e) { }
             });
         }
+
+        // Fastfetch Terminal Modal Toggle
+        const termModal = document.getElementById('term-modal');
+        const openTermBtn = document.getElementById('open-term-btn');
+        const openTermPill = document.getElementById('open-term-pill');
+        const closeTermDot = document.getElementById('close-term-dot');
+
+        function openModal() {
+            termModal.classList.add('active');
+        }
+        function closeModal() {
+            termModal.classList.remove('active');
+        }
+
+        if (openTermBtn) openTermBtn.addEventListener('click', openModal);
+        if (openTermPill) openTermPill.addEventListener('click', openModal);
+        if (closeTermDot) closeTermDot.addEventListener('click', closeModal);
+        if (termModal) {
+            termModal.addEventListener('click', (e) => {
+                if (e.target === termModal) closeModal();
+            });
+        }
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && termModal && termModal.classList.contains('active')) {
+                closeModal();
+            }
+        });
 
         // Live Discord Status (Lanyard)
         const DISCORD_USER_ID = '882747349615652924';
