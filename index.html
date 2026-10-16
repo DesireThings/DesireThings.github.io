@@ -915,6 +915,50 @@
             .fetch-key {
                 min-width: unset;
             }
+
+            /* Icon-only mode toggle so the title keeps room beside the 44px window buttons
+               (the label stays in the accessibility tree as the button's name) */
+            .terminal-header .mode-toggle-btn span {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                overflow: hidden;
+                clip-path: inset(50%);
+                white-space: nowrap;
+            }
+        }
+
+        /* Touch: lift every small control to the 44px comfort size */
+        @media (max-width: 600px), (pointer: coarse) {
+            .terminal-header {
+                height: auto;
+                min-height: 44px;
+                padding-right: 0;
+            }
+
+            .klassy-buttons {
+                gap: 0;
+            }
+
+            .klassy-btn {
+                width: 44px;
+                height: 44px;
+            }
+
+            .mode-toggle-btn,
+            .handle-badge,
+            .copy-discord-btn,
+            .lang-tag,
+            .term-link,
+            .terminal-restore-btn,
+            .cli-input {
+                min-height: 44px;
+            }
+
+            .mode-toggle-btn {
+                min-width: 44px;
+                justify-content: center;
+            }
         }
 
         @media (max-width: 480px) {
