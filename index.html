@@ -92,6 +92,12 @@
             box-sizing: border-box;
         }
 
+        /* One consistent focus ring for every control against the dark / magenta palette */
+        :focus-visible {
+            outline: 2px solid var(--c-magenta);
+            outline-offset: 2px;
+        }
+
         body {
             background-color: var(--bg-body);
             color: var(--term-fg);
@@ -721,11 +727,6 @@
             transform: translateX(3px);
         }
 
-        .term-link:focus-visible {
-            outline: 2px solid var(--c-magenta);
-            outline-offset: 2px;
-        }
-
         .arrow {
             color: var(--term-fg-faint);
             transition: color 0.2s, transform 0.2s;
@@ -1339,13 +1340,13 @@
             <div class="terminal-header">
                 <div class="header-left">
                     <!-- Konsole / Terminal prompt icon -->
-                    <svg class="header-icon"><use href="#i-terminal"></use></svg>
+                    <svg class="header-icon" aria-hidden="true"><use href="#i-terminal"></use></svg>
                     <span>ashley@cachyos-desktop-ashley: ~</span>
                 </div>
 
                 <div class="header-right">
                     <button class="mode-toggle-btn" id="mode-toggle-to-gui" title="Switch to Simple Card View">
-                        <svg viewBox="0 0 24 24">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
                             <path d="M4 4h6v6H4zm10 0h6v6h-6zM4 14h6v6H4zm10 0h6v6h-6z" />
                         </svg>
                         <span>Simple View</span>
@@ -1355,19 +1356,19 @@
 
                     <!-- Klassy Window Buttons (Minimize, Maximize/Restore, Close) -->
                     <div class="klassy-buttons" aria-label="Window controls">
-                        <button class="klassy-btn btn-min" id="win-min" title="Minimize / Roll up" aria-label="Minimize">
-                            <svg viewBox="0 0 12 12">
+                        <button class="klassy-btn btn-min" id="win-min" title="Minimize / Roll up" aria-label="Minimize" aria-pressed="false">
+                            <svg viewBox="0 0 12 12" aria-hidden="true">
                                 <line x1="2" y1="6" x2="10" y2="6"></line>
                             </svg>
                         </button>
                         <button class="klassy-btn btn-max" id="win-max" title="Maximize / Toggle width"
-                            aria-label="Maximize">
-                            <svg viewBox="0 0 12 12">
+                            aria-label="Maximize" aria-pressed="false">
+                            <svg viewBox="0 0 12 12" aria-hidden="true">
                                 <rect x="2" y="2" width="8" height="8"></rect>
                             </svg>
                         </button>
                         <button class="klassy-btn btn-close" id="win-close" title="Close session" aria-label="Close">
-                            <svg viewBox="0 0 12 12">
+                            <svg viewBox="0 0 12 12" aria-hidden="true">
                                 <line x1="2" y1="2" x2="10" y2="10"></line>
                                 <line x1="10" y1="2" x2="2" y2="10"></line>
                             </svg>
@@ -1381,7 +1382,7 @@
                 <div class="profile-row">
                     <div class="pfp-wrapper">
                         <div class="pfp">
-                            <img src="https://avatars.githubusercontent.com/u/91154340?s=208&v=4" alt="Profile Picture"
+                            <img src="https://avatars.githubusercontent.com/u/91154340?s=208&v=4" alt=""
                                 width="88" height="88" fetchpriority="high">
                         </div>
                         <div class="status-indicator" id="discord-indicator" title="Discord Status" role="img"
@@ -1513,7 +1514,7 @@
                                     <svg aria-hidden="true"><use href="#i-github"></use></svg>
                                     <span>github</span>
                                 </div>
-                                <span class="arrow">&rarr;</span>
+                                <span class="arrow" aria-hidden="true">&rarr;</span>
                             </a>
                         </li>
 
@@ -1524,7 +1525,7 @@
                                     <svg aria-hidden="true"><use href="#i-osu"></use></svg>
                                     <span>osu-profile</span>
                                 </div>
-                                <span class="arrow">&rarr;</span>
+                                <span class="arrow" aria-hidden="true">&rarr;</span>
                             </a>
                         </li>
 
@@ -1535,7 +1536,7 @@
                                     <svg aria-hidden="true"><use href="#i-torii"></use></svg>
                                     <span>torii-profile</span>
                                 </div>
-                                <span class="arrow">&rarr;</span>
+                                <span class="arrow" aria-hidden="true">&rarr;</span>
                             </a>
                         </li>
 
@@ -1545,7 +1546,7 @@
                                     <svg aria-hidden="true"><use href="#i-discord"></use></svg>
                                     <span>torii-discord</span>
                                 </div>
-                                <span class="arrow">&rarr;</span>
+                                <span class="arrow" aria-hidden="true">&rarr;</span>
                             </a>
                         </li>
 
@@ -1556,7 +1557,7 @@
                                     <svg aria-hidden="true"><use href="#i-kofi"></use></svg>
                                     <span>ko-fi</span>
                                 </div>
-                                <span class="arrow">&rarr;</span>
+                                <span class="arrow" aria-hidden="true">&rarr;</span>
                             </a>
                         </li>
                     </ul>
@@ -1589,14 +1590,14 @@
         <section class="card-view-container" id="card-view-container" aria-label="Simple Profile View">
             <div class="card-top-bar">
                 <button class="mode-toggle-btn" id="mode-toggle-to-term" title="Switch back to Konsole Terminal View">
-                    <svg><use href="#i-terminal"></use></svg>
+                    <svg aria-hidden="true"><use href="#i-terminal"></use></svg>
                     <span>Terminal View</span>
                 </button>
             </div>
 
             <div class="card-pfp-wrapper">
                 <div class="card-pfp">
-                    <img src="https://avatars.githubusercontent.com/u/91154340?s=208&v=4" alt="Profile Picture"
+                    <img src="https://avatars.githubusercontent.com/u/91154340?s=208&v=4" alt=""
                         width="104" height="104" fetchpriority="high">
                 </div>
                 <div class="status-indicator" id="card-discord-indicator" title="Discord Status" role="img"
@@ -1630,7 +1631,7 @@
                             <svg aria-hidden="true"><use href="#i-github"></use></svg>
                             <span>GitHub Profile & Projects</span>
                         </div>
-                        <span class="arrow">&rarr;</span>
+                        <span class="arrow" aria-hidden="true">&rarr;</span>
                     </a>
                 </li>
 
@@ -1641,7 +1642,7 @@
                             <svg aria-hidden="true"><use href="#i-osu"></use></svg>
                             <span>osu! Profile</span>
                         </div>
-                        <span class="arrow">&rarr;</span>
+                        <span class="arrow" aria-hidden="true">&rarr;</span>
                     </a>
                 </li>
 
@@ -1652,7 +1653,7 @@
                             <svg aria-hidden="true"><use href="#i-torii"></use></svg>
                             <span>Torii Nova Profile</span>
                         </div>
-                        <span class="arrow">&rarr;</span>
+                        <span class="arrow" aria-hidden="true">&rarr;</span>
                     </a>
                 </li>
 
@@ -1663,7 +1664,7 @@
                             <svg aria-hidden="true"><use href="#i-discord"></use></svg>
                             <span>Torii Nova Community Discord</span>
                         </div>
-                        <span class="arrow">&rarr;</span>
+                        <span class="arrow" aria-hidden="true">&rarr;</span>
                     </a>
                 </li>
 
@@ -1674,7 +1675,7 @@
                             <svg aria-hidden="true"><use href="#i-kofi"></use></svg>
                             <span>Support on Ko-fi</span>
                         </div>
-                        <span class="arrow">&rarr;</span>
+                        <span class="arrow" aria-hidden="true">&rarr;</span>
                     </a>
                 </li>
             </ul>
@@ -2039,13 +2040,15 @@
 
         if (btnMin && terminalEl) {
             btnMin.addEventListener('click', () => {
-                terminalEl.classList.toggle('is-minimized');
+                const minimized = terminalEl.classList.toggle('is-minimized');
+                btnMin.setAttribute('aria-pressed', String(minimized));
             });
         }
 
         if (btnMax && terminalEl) {
             btnMax.addEventListener('click', () => {
-                terminalEl.classList.toggle('is-maximized');
+                const maximized = terminalEl.classList.toggle('is-maximized');
+                btnMax.setAttribute('aria-pressed', String(maximized));
             });
         }
 
@@ -2060,6 +2063,7 @@
         if (restoreBtn && terminalEl && restoreToast) {
             restoreBtn.addEventListener('click', () => {
                 terminalEl.classList.remove('is-closed', 'is-minimized');
+                if (btnMin) btnMin.setAttribute('aria-pressed', 'false');
                 restoreToast.style.display = 'none';
                 if (btnClose) btnClose.focus();
             });
