@@ -24,9 +24,34 @@
         content="Linux enthusiast, CachyOS user, osu! player, Torii Nova contributor and administrator.">
     <meta name="twitter:image" content="https://github.com/DesireThings.png">
 
-    <link rel="icon" type="image/png" href="https://github.com/DesireThings.png">
+    <link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/91154340?s=64&v=4">
+
+    <!-- Warm up the connections the page needs before the parser reaches them -->
+    <link rel="preconnect" href="https://avatars.githubusercontent.com">
+    <link rel="preconnect" href="https://api.lanyard.rest" crossorigin>
+    <link rel="preload" href="fonts/dm-mono-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="fonts/dm-mono-500-latin.woff2" as="font" type="font/woff2" crossorigin>
 
     <style>
+        /* Self-hosted DM Mono (Latin subset, OFL; see fonts/LICENSE.md). 600/700 are synthesised from 500, as before. */
+        @font-face {
+            font-family: "DM Mono";
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url("fonts/dm-mono-400-latin.woff2") format("woff2");
+            unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+        }
+
+        @font-face {
+            font-family: "DM Mono";
+            font-style: normal;
+            font-weight: 500;
+            font-display: swap;
+            src: url("fonts/dm-mono-500-latin.woff2") format("woff2");
+            unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+        }
+
         /* System24 Konsole / CachyOS Palette */
         :root {
             --bg-body: #141414;
@@ -88,10 +113,11 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 700px;
-            height: 700px;
-            background: radial-gradient(circle, rgba(205, 145, 216, 0.08) 0%, rgba(110, 201, 166, 0.05) 45%, transparent 70%);
-            filter: blur(100px);
+            /* Softness is baked into the gradient (larger box, long fade) instead of filter: blur(100px),
+               which had to be recomputed every frame of the pulse behind the blurred terminal */
+            width: 1100px;
+            height: 1100px;
+            background: radial-gradient(circle closest-side, rgba(205, 145, 216, 0.075) 0%, rgba(110, 201, 166, 0.045) 40%, rgba(110, 201, 166, 0.02) 68%, transparent 100%);
             z-index: 0;
             pointer-events: none;
             animation: pulseGlow 12s ease-in-out infinite alternate;
@@ -1265,7 +1291,8 @@
                 <div class="profile-row">
                     <div class="pfp-wrapper">
                         <div class="pfp">
-                            <img src="https://github.com/DesireThings.png" alt="Profile Picture" width="88" height="88">
+                            <img src="https://avatars.githubusercontent.com/u/91154340?s=208&v=4" alt="Profile Picture"
+                                width="88" height="88" fetchpriority="high">
                         </div>
                         <div class="status-indicator" id="discord-indicator" title="Discord Status" role="img"
                             aria-label="Discord status: unknown"></div>
@@ -1503,7 +1530,8 @@
 
             <div class="card-pfp-wrapper">
                 <div class="card-pfp">
-                    <img src="https://github.com/DesireThings.png" alt="Profile Picture" width="104" height="104">
+                    <img src="https://avatars.githubusercontent.com/u/91154340?s=208&v=4" alt="Profile Picture"
+                        width="104" height="104" fetchpriority="high">
                 </div>
                 <div class="status-indicator" id="card-discord-indicator" title="Discord Status" role="img"
                     aria-label="Discord status: unknown"></div>
