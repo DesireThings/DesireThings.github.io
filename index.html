@@ -383,12 +383,18 @@
             transition: background-color 0.3s ease;
         }
 
+        .status-indicator[data-status="online"] {
+            background-color: var(--status-online);
+        }
+
         /* Non-colour status cue (Discord-style shapes): idle = crescent, dnd = bar, offline = ring */
         .status-indicator[data-status="idle"] {
+            background-color: var(--status-idle);
             background-image: radial-gradient(circle 5px at 3px 3px, var(--term-surface) 95%, transparent 100%);
         }
 
         .status-indicator[data-status="dnd"] {
+            background-color: var(--status-dnd);
             background-image: linear-gradient(var(--term-surface), var(--term-surface));
             background-size: 8px 3px;
             background-position: center;
@@ -396,6 +402,7 @@
         }
 
         .status-indicator[data-status="offline"] {
+            background-color: var(--status-offline);
             background-image: radial-gradient(circle 3px, var(--term-surface) 95%, transparent 100%);
         }
 
@@ -1755,9 +1762,8 @@
         updateClock();
         setInterval(updateClock, 1000);
 
-        // Click to copy Discord tag
-        const copyBtn = document.getElementById('copy-btn');
-        const copiedBadge = document.getElementById('copied-badge');
+        // Click to copy Discord tag (terminal and card views share one handler)
+        const DISCORD_HANDLE = 'desire_things';
         const copyStatus = document.getElementById('copy-status');
 
         // Announce the copy to screen readers (the visual badge sits inside the button, where live regions are ignored)
@@ -1769,35 +1775,26 @@
             }, 2000);
         }
 
-        if (copyBtn) {
-            copyBtn.addEventListener('click', async () => {
-                try {
-                    await navigator.clipboard.writeText('desire_things');
-                    announceCopied();
-                    copiedBadge.style.display = 'inline';
-                    setTimeout(() => {
-                        copiedBadge.style.display = 'none';
-                    }, 2000);
-                } catch (e) { }
-            });
+        async function copyHandle(badge) {
+            try {
+                await navigator.clipboard.writeText(DISCORD_HANDLE);
+            } catch (e) {
+                console.warn('Copying the Discord handle failed:', e);
+                return;
+            }
+            announceCopied();
+            if (badge) {
+                badge.style.display = 'inline';
+                setTimeout(() => {
+                    badge.style.display = 'none';
+                }, 2000);
+            }
         }
 
-        const cardCopyBtn = document.getElementById('card-copy-btn');
-        const cardCopiedBadge = document.getElementById('card-copied-badge');
-        if (cardCopyBtn) {
-            cardCopyBtn.addEventListener('click', async () => {
-                try {
-                    await navigator.clipboard.writeText('desire_things');
-                    announceCopied();
-                    if (cardCopiedBadge) {
-                        cardCopiedBadge.style.display = 'inline';
-                        setTimeout(() => {
-                            cardCopiedBadge.style.display = 'none';
-                        }, 2000);
-                    }
-                } catch (e) { }
-            });
-        }
+        [['copy-btn', 'copied-badge'], ['card-copy-btn', 'card-copied-badge']].forEach(([btnId, badgeId]) => {
+            const btn = document.getElementById(btnId);
+            if (btn) btn.addEventListener('click', () => copyHandle(document.getElementById(badgeId)));
+        });
 
         // Mode Switching (Terminal View <-> Simple Card View)
         const modeToggleToGui = document.getElementById('mode-toggle-to-gui');
@@ -1808,16 +1805,23 @@
         const bootOptTerm = document.getElementById('boot-opt-term');
         const bootOptCard = document.getElementById('boot-opt-card');
 
-        function setViewMode(mode, save = true) {
-            if (mode === 'card') {
-                if (terminalEl) terminalEl.style.display = 'none';
-                if (cardEl) cardEl.style.display = 'flex';
-                if (save) localStorage.setItem('profile_view_mode', 'card');
-            } else {
-                if (terminalEl) terminalEl.style.display = 'flex';
-                if (cardEl) cardEl.style.display = 'none';
-                if (save) localStorage.setItem('profile_view_mode', 'terminal');
+        const VIEW_MODE_KEY = 'profile_view_mode';
+
+        function saveViewMode(mode) {
+            // Storage can be blocked or full: the view still switches and the boot menu still closes,
+            // the choice just isn't remembered
+            try {
+                localStorage.setItem(VIEW_MODE_KEY, mode);
+            } catch (e) {
+                console.warn('Could not save the view mode:', e);
             }
+        }
+
+        function setViewMode(mode, save = true) {
+            const isCard = mode === 'card';
+            if (terminalEl) terminalEl.style.display = isCard ? 'none' : 'flex';
+            if (cardEl) cardEl.style.display = isCard ? 'flex' : 'none';
+            if (save) saveViewMode(isCard ? 'card' : 'terminal');
             if (bootModal && bootModal.open) bootModal.close();
         }
 
@@ -1871,51 +1875,40 @@
         });
 
         // Initialize display based on saved preference or show Boot Menu
+        let savedMode = null;
         try {
-            const savedMode = localStorage.getItem('profile_view_mode');
-            if (savedMode === 'card') {
-                setViewMode('card', false);
-            } else if (savedMode === 'terminal') {
-                setViewMode('terminal', false);
-            } else {
-                // First time visitor: show CachyOS GRUB bootloader menu
-                // (Esc closes it natively and leaves the default terminal view, without saving a choice)
-                if (bootModal && typeof bootModal.showModal === 'function') {
-                    bootModal.showModal();
-                }
-            }
-        } catch (e) { }
+            savedMode = localStorage.getItem(VIEW_MODE_KEY);
+        } catch (e) {
+            // Storage blocked: skip the boot menu, since the choice could never be remembered
+            console.warn('Could not read the saved view mode:', e);
+            savedMode = 'terminal';
+        }
+        if (savedMode === 'card' || savedMode === 'terminal') {
+            setViewMode(savedMode, false);
+        } else if (bootModal && typeof bootModal.showModal === 'function') {
+            // First time visitor: show CachyOS GRUB bootloader menu
+            // (Esc closes it natively and leaves the default terminal view, without saving a choice)
+            bootModal.showModal();
+        }
 
         // Live Discord Status via Lanyard (WebSocket with REST fallback)
         const DISCORD_USER_ID = '882747349615652924';
 
+        const KNOWN_STATUSES = ['online', 'idle', 'dnd', 'offline'];
+        const statusIndicators = ['discord-indicator', 'card-discord-indicator']
+            .map(id => document.getElementById(id))
+            .filter(Boolean);
+
         function applyLanyardData(d) {
             if (!d) return;
             const status = d.discord_status || 'offline';
-            const colors = {
-                online: 'var(--status-online)',
-                idle: 'var(--status-idle)',
-                dnd: 'var(--status-dnd)',
-                offline: 'var(--status-offline)'
-            };
-            const chosenColor = colors[status] || colors.offline;
-            const shapeStatus = colors[status] ? status : 'offline';
 
-            const indicator = document.getElementById('discord-indicator');
-            if (indicator) {
-                indicator.style.backgroundColor = chosenColor;
+            // Colour and shape both come from CSS via data-status
+            statusIndicators.forEach(indicator => {
                 indicator.title = `Discord: ${status}`;
                 indicator.setAttribute('aria-label', `Discord status: ${status}`);
-                indicator.dataset.status = shapeStatus;
-            }
-
-            const cardIndicator = document.getElementById('card-discord-indicator');
-            if (cardIndicator) {
-                cardIndicator.style.backgroundColor = chosenColor;
-                cardIndicator.title = `Discord: ${status}`;
-                cardIndicator.setAttribute('aria-label', `Discord status: ${status}`);
-                cardIndicator.dataset.status = shapeStatus;
-            }
+                indicator.dataset.status = KNOWN_STATUSES.includes(status) ? status : 'offline';
+            });
 
             // Activity display
             const activities = d.activities || [];
@@ -1996,37 +1989,35 @@
         connectLanyardSocket();
 
         // Klassy Window Controls Handling
-        const termContainer = document.querySelector('.terminal-container');
         const btnMin = document.getElementById('win-min');
         const btnMax = document.getElementById('win-max');
         const btnClose = document.getElementById('win-close');
         const restoreToast = document.getElementById('restore-toast');
         const restoreBtn = document.getElementById('restore-btn');
 
-        if (btnMin && termContainer) {
+        if (btnMin && terminalEl) {
             btnMin.addEventListener('click', () => {
-                termContainer.classList.toggle('is-minimized');
+                terminalEl.classList.toggle('is-minimized');
             });
         }
 
-        if (btnMax && termContainer) {
+        if (btnMax && terminalEl) {
             btnMax.addEventListener('click', () => {
-                termContainer.classList.toggle('is-maximized');
+                terminalEl.classList.toggle('is-maximized');
             });
         }
 
-        if (btnClose && termContainer && restoreToast) {
+        if (btnClose && terminalEl && restoreToast) {
             btnClose.addEventListener('click', () => {
-                termContainer.classList.add('is-closed');
+                terminalEl.classList.add('is-closed');
                 restoreToast.style.display = 'flex';
                 if (restoreBtn) restoreBtn.focus();
             });
         }
 
-        if (restoreBtn && termContainer && restoreToast) {
+        if (restoreBtn && terminalEl && restoreToast) {
             restoreBtn.addEventListener('click', () => {
-                termContainer.classList.remove('is-closed');
-                termContainer.classList.remove('is-minimized');
+                terminalEl.classList.remove('is-closed', 'is-minimized');
                 restoreToast.style.display = 'none';
                 if (btnClose) btnClose.focus();
             });
@@ -2162,15 +2153,15 @@
                     }
                     break;
 
-                case 'date':
-                    const now = new Date();
+                case 'date': {
                     const ukDate = new Intl.DateTimeFormat('en-GB', {
                         timeZone: 'Europe/London',
                         dateStyle: 'full',
                         timeStyle: 'medium'
-                    }).format(now);
+                    }).format(new Date());
                     appendCliLine(`<span>${ukDate}</span>`);
                     break;
+                }
 
                 case 'echo':
                     appendCliLine(`<span>${escapeHtml(args.join(' '))}</span>`);
@@ -2185,7 +2176,7 @@
                     `);
                     break;
 
-                case 'ls':
+                case 'ls': {
                     const target = (args[0] || '').replace(/^\.?\/?/, '').replace(/\/$/, '');
                     if (target === '' || target === '.') {
                         appendCliLine(`
@@ -2206,8 +2197,9 @@
                         appendCliLine(`<span class="fg-red">ls: cannot access '${escapeHtml(args[0])}': No such file or directory</span>`);
                     }
                     break;
+                }
 
-                case 'cat':
+                case 'cat': {
                     const file = (args[0] || '').toLowerCase();
                     if (file === 'languages.txt' || file === 'languages') {
                         appendCliLine(escapeHtml(readLanguages()));
@@ -2229,6 +2221,7 @@
                         appendCliLine(`<span class="fg-red">cat: ${escapeHtml(args[0])}: No such file or directory</span>`);
                     }
                     break;
+                }
 
                 case 'fastfetch':
                     appendCliLine(fastfetchOutputHtml());
@@ -2272,9 +2265,8 @@
             });
 
             // Focus CLI input if clicking on terminal background
-            const terminalContainerEl = document.querySelector('.terminal-container');
-            if (terminalContainerEl) {
-                terminalContainerEl.addEventListener('click', (e) => {
+            if (terminalEl) {
+                terminalEl.addEventListener('click', (e) => {
                     // Skip on touch screens, where focusing the input pops up the on-screen keyboard on every tap
                     if (window.matchMedia('(pointer: coarse)').matches) return;
                     // Only focus if user didn't click a link, button, or select text
@@ -2289,7 +2281,6 @@
             document.querySelectorAll('.lang-tag').forEach(tag => {
                 tag.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    const lang = tag.textContent.trim();
                     cliInput.value = `cat languages.txt`;
                     executeCliCommand(`cat languages.txt`);
                 });
