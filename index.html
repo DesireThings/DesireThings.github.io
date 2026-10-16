@@ -736,6 +736,10 @@
             padding-left: 4px;
         }
 
+        .cli-output > .fastfetch-box {
+            margin-top: 4px;
+        }
+
         .cli-input-row {
             display: flex;
             align-items: center;
@@ -1386,7 +1390,7 @@
                             <div class="fetch-entry"><dt class="fetch-key">Displays:</dt><dd class="fetch-val">MAG 274QRFW
                                     (1440p @ 180Hz) &bull; E201W (900p @ 60Hz)</dd></div>
                             <div class="fetch-entry"><dt class="fetch-key">Peripherals:</dt><dd class="fetch-val">Wooting
-                                    Two HE &bull; CTL-480 @ 1000hz</dd></div>
+                                    Two HE &bull; CTL-480 @ 1000Hz</dd></div>
                         </dl>
 
                         <div class="palette-row" aria-hidden="true">
@@ -1531,9 +1535,8 @@
             <h1 class="card-name">Remi / Ashley</h1>
             <div class="card-tagline">@DesireThings &bull; UK</div>
 
-            <p class="card-bio">
-                Linux enthusiast & CachyOS daily driver. osu! player, Torii Nova contributor, and community administrator.
-            </p>
+            <!-- Filled from the terminal view's .bio-text on load -->
+            <p class="card-bio" id="card-bio"></p>
 
             <div class="card-badges-row">
                 <a class="handle-badge" href="https://github.com/DesireThings" target="_blank" rel="noopener noreferrer">
@@ -2006,6 +2009,45 @@
                 .replace(/'/g, '&#39;');
         }
 
+        // The static terminal markup is the single source for bio, languages and specs;
+        // the card view and CLI commands read from it instead of keeping their own copies
+        function readText(el) {
+            return el ? el.textContent.replace(/\s+/g, ' ').trim() : '';
+        }
+
+        const BIO_TEXT = readText(document.querySelector('.bio-text'));
+        const fastfetchBox = document.querySelector('.terminal-body .fastfetch-box');
+
+        const cardBio = document.getElementById('card-bio');
+        if (cardBio) cardBio.textContent = BIO_TEXT;
+
+        function readLanguages() {
+            return Array.from(document.querySelectorAll('.lang-tag'), readText).join(', ');
+        }
+
+        function readSpecs() {
+            const specs = {};
+            if (!fastfetchBox) return specs;
+            fastfetchBox.querySelectorAll('.fetch-entry').forEach(entry => {
+                const key = readText(entry.querySelector('.fetch-key')).replace(/:$/, '').toLowerCase();
+                specs[key] = readText(entry.querySelector('.fetch-val'));
+            });
+            return specs;
+        }
+
+        function fastfetchOutputHtml() {
+            if (!fastfetchBox) return '';
+            const box = fastfetchBox.cloneNode(true);
+            // Echoed output is plain text in the log, so drop the group headings from the document outline
+            box.querySelectorAll('h3').forEach(h => {
+                const div = document.createElement('div');
+                div.className = h.className;
+                div.innerHTML = h.innerHTML;
+                h.replaceWith(div);
+            });
+            return box.outerHTML;
+        }
+
         function executeCliCommand(cmdString) {
             const trimmed = cmdString.trim();
             if (!trimmed) return;
@@ -2104,13 +2146,11 @@
                 case 'cat':
                     const file = (args[0] || '').toLowerCase();
                     if (file === 'languages.txt' || file === 'languages') {
-                        appendCliLine(`Python, C# (.NET), TypeScript, JavaScript, HTML5 & CSS3`);
+                        appendCliLine(escapeHtml(readLanguages()));
                     } else if (file === 'bio.txt' || file === 'bio') {
-                        appendCliLine(`Linux enthusiast & CachyOS daily driver. osu! player, Torii Nova contributor, and community administrator.`);
+                        appendCliLine(escapeHtml(BIO_TEXT));
                     } else if (file === 'spec.json' || file === 'specs') {
-                        appendCliLine(`
-                            <pre style="margin:0; font-family:inherit; color:var(--c-cyan);">{\n  "cpu": "Intel i5-13600KF (20t @ 5.10 GHz)",\n  "gpu": "AMD Radeon RX 9070 XT (16GB)",\n  "ram": "32GB DDR4 @ 3200 MT/s",\n  "os": "CachyOS x86_64",\n  "tablet": "Wacom CTL-480 @ 1000hz"\n}</pre>
-                        `);
+                        appendCliLine(`<pre style="margin:0; font-family:inherit; color:var(--c-cyan);">${escapeHtml(JSON.stringify(readSpecs(), null, 2))}</pre>`);
                     } else if (file === 'links.txt' || file === 'links') {
                         appendCliLine(`
                             • GitHub: https://github.com/DesireThings<br>
@@ -2127,19 +2167,7 @@
                     break;
 
                 case 'fastfetch':
-                    appendCliLine(`
-                        <div class="fastfetch-box" style="margin-top:4px;">
-                            <div class="fetch-header">── Software ──</div>
-                            <div class="fetch-entry"><span class="fetch-key">OS:</span><span class="fetch-val">CachyOS x86_64 (linux-cachyos-bore)</span></div>
-                            <div class="fetch-entry"><span class="fetch-key">Desktop:</span><span class="fetch-val">KDE Plasma 6 (Wayland) &bull; KWin</span></div>
-                            <div class="fetch-entry"><span class="fetch-key">Shell:</span><span class="fetch-val">fish &bull; starship prompt</span></div>
-                            <div class="fetch-entry"><span class="fetch-key">Terminal:</span><span class="fetch-val">Konsole &bull; antigravity-ide</span></div>
-                            <div class="fetch-header">── Hardware ──</div>
-                            <div class="fetch-entry"><span class="fetch-key">CPU:</span><span class="fetch-val">Intel i5-13600KF (20 threads @ 5.10 GHz)</span></div>
-                            <div class="fetch-entry"><span class="fetch-key">GPU:</span><span class="fetch-val">AMD Radeon RX 9070 XT (16 GB)</span></div>
-                            <div class="fetch-entry"><span class="fetch-key">Memory:</span><span class="fetch-val">32 GB DDR4 @ 3200 MT/s</span></div>
-                        </div>
-                    `);
+                    appendCliLine(fastfetchOutputHtml());
                     break;
 
                 default:
