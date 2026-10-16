@@ -1743,24 +1743,32 @@
     </dialog>
 
     <script>
-        // Live UK Clock
+        // Live UK Clock: it only shows minutes, so tick once a minute on the minute boundary
+        const clockEl = document.getElementById('live-clock');
+        let ukTimeFormat = null;
+        try {
+            ukTimeFormat = new Intl.DateTimeFormat('en-GB', {
+                timeZone: 'Europe/London',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
+        } catch (e) {
+            console.warn('No Europe/London time zone data, so the clock is disabled:', e);
+        }
+        let clockTimer = null;
+
         function updateClock() {
-            try {
-                const now = new Date();
-                const timeString = new Intl.DateTimeFormat('en-GB', {
-                    timeZone: 'Europe/London',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: false
-                }).format(now);
-                const clockEl = document.getElementById('live-clock');
-                if (clockEl) {
-                    clockEl.textContent = `UK \u2022 ${timeString}`;
-                }
-            } catch (e) { }
+            if (!clockEl || !ukTimeFormat) return;
+            clockEl.textContent = `UK \u2022 ${ukTimeFormat.format(new Date())}`;
+            clearTimeout(clockTimer);
+            clockTimer = setTimeout(updateClock, 60000 - (Date.now() % 60000));
         }
         updateClock();
-        setInterval(updateClock, 1000);
+        // Hidden tabs throttle timers, so catch up as soon as the tab is shown again
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) updateClock();
+        });
 
         // Click to copy Discord tag (terminal and card views share one handler)
         const DISCORD_HANDLE = 'desire_things';
@@ -1943,50 +1951,84 @@
                     }
                 }
             })
-            .catch(() => { });
+            .catch(e => console.warn('Lanyard REST request failed:', e));
 
-        // Real-time WebSocket connection
+        // Real-time WebSocket connection. Reconnects back off exponentially (5 s doubling to 5 min,
+        // reset once presence arrives) and pause while the tab is hidden.
+        const LANYARD_RETRY_MIN = 5000;
+        const LANYARD_RETRY_MAX = 5 * 60 * 1000;
+        let lanyardRetryDelay = LANYARD_RETRY_MIN;
+        let lanyardRetryTimer = null;
+        let lanyardSocket = null;
         let heartbeatInterval = null;
+
+        function scheduleLanyardReconnect() {
+            // While hidden, the visibilitychange listener below reconnects once the tab is shown
+            if (document.hidden || lanyardRetryTimer) return;
+            lanyardRetryTimer = setTimeout(() => {
+                lanyardRetryTimer = null;
+                connectLanyardSocket();
+            }, lanyardRetryDelay);
+            lanyardRetryDelay = Math.min(lanyardRetryDelay * 2, LANYARD_RETRY_MAX);
+        }
+
         function connectLanyardSocket() {
+            if (lanyardSocket) return;
+            let ws;
             try {
-                const ws = new WebSocket('wss://api.lanyard.rest/socket');
-                ws.onmessage = (event) => {
-                    try {
-                        const message = JSON.parse(event.data);
-                        const { op, t, d } = message;
+                ws = new WebSocket('wss://api.lanyard.rest/socket');
+            } catch (e) {
+                console.warn('Could not open the Lanyard socket:', e);
+                scheduleLanyardReconnect();
+                return;
+            }
+            lanyardSocket = ws;
 
-                        if (op === 1) { // Hello
-                            if (heartbeatInterval) clearInterval(heartbeatInterval);
-                            heartbeatInterval = setInterval(() => {
-                                if (ws.readyState === WebSocket.OPEN) {
-                                    ws.send(JSON.stringify({ op: 3 }));
-                                }
-                            }, d.heartbeat_interval);
+            ws.onmessage = (event) => {
+                try {
+                    const message = JSON.parse(event.data);
+                    const { op, t, d } = message;
 
-                            // Initialize subscription
-                            ws.send(JSON.stringify({
-                                op: 2,
-                                d: { subscribe_to_id: DISCORD_USER_ID }
-                            }));
-                        } else if (op === 0) { // Event
-                            if (t === 'INIT_STATE' || t === 'PRESENCE_UPDATE') {
-                                applyLanyardData(d);
+                    if (op === 1) { // Hello
+                        if (heartbeatInterval) clearInterval(heartbeatInterval);
+                        heartbeatInterval = setInterval(() => {
+                            if (ws.readyState === WebSocket.OPEN) {
+                                ws.send(JSON.stringify({ op: 3 }));
                             }
+                        }, d.heartbeat_interval);
+
+                        // Initialize subscription
+                        ws.send(JSON.stringify({
+                            op: 2,
+                            d: { subscribe_to_id: DISCORD_USER_ID }
+                        }));
+                    } else if (op === 0) { // Event
+                        if (t === 'INIT_STATE' || t === 'PRESENCE_UPDATE') {
+                            lanyardRetryDelay = LANYARD_RETRY_MIN;
+                            applyLanyardData(d);
                         }
-                    } catch (e) { }
-                };
+                    }
+                } catch (e) {
+                    console.warn('Ignoring a bad Lanyard message:', e);
+                }
+            };
 
-                ws.onclose = () => {
-                    if (heartbeatInterval) clearInterval(heartbeatInterval);
-                    setTimeout(connectLanyardSocket, 5000);
-                };
+            ws.onclose = () => {
+                if (heartbeatInterval) clearInterval(heartbeatInterval);
+                heartbeatInterval = null;
+                lanyardSocket = null;
+                scheduleLanyardReconnect();
+            };
 
-                ws.onerror = () => {
-                    ws.close();
-                };
-            } catch (e) { }
+            ws.onerror = () => {
+                ws.close();
+            };
         }
         connectLanyardSocket();
+
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && !lanyardSocket && !lanyardRetryTimer) connectLanyardSocket();
+        });
 
         // Klassy Window Controls Handling
         const btnMin = document.getElementById('win-min');
