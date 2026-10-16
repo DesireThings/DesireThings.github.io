@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404: Not found | Remi / Ashley (@DesireThings)</title>
+    <meta name="robots" content="noindex">
+    <meta name="theme-color" content="#1c1c1c">
+    <link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/91154340?s=64&v=4">
+    <!-- Root-absolute paths: GitHub Pages serves this file at whatever missing URL was requested -->
+    <link rel="preload" href="/fonts/dm-mono-500-latin.woff2" as="font" type="font/woff2" crossorigin>
+
+    <style>
+        /* Same self-hosted DM Mono and System24 palette as index.html */
+        @font-face {
+            font-family: "DM Mono";
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url("/fonts/dm-mono-400-latin.woff2") format("woff2");
+            unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+        }
+
+        @font-face {
+            font-family: "DM Mono";
+            font-style: normal;
+            font-weight: 500;
+            font-display: swap;
+            src: url("/fonts/dm-mono-500-latin.woff2") format("woff2");
+            unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+        }
+
+        :root {
+            --bg-body: #141414;
+            --term-bg: rgba(28, 28, 28, 0.94);
+            --term-border: #cd91d8;
+            --term-inner-border: rgba(255, 255, 255, 0.08);
+            --term-header: #232323;
+            --term-fg: #cfcfcf;
+            --term-fg-faint: #8c8c8c;
+            --term-fg-intense: #eeeeee;
+            --c-red: #e6837e;
+            --c-green: #6ec9a6;
+            --c-yellow: #c2b264;
+            --c-blue: #6fb8d9;
+            --c-magenta: #cd91d8;
+            --card-bg: rgba(35, 35, 35, 0.7);
+            --card-hover: rgba(45, 45, 45, 0.95);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        :focus-visible {
+            outline: 2px solid var(--c-magenta);
+            outline-offset: 2px;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--term-fg);
+            font-family: "DM Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            min-height: 100dvh;
+            margin: 0;
+            padding: 32px 16px;
+        }
+
+        .terminal-container {
+            max-width: 560px;
+            width: 100%;
+            background: var(--term-bg);
+            border: 1.5px solid var(--term-border);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(205, 145, 216, 0.15);
+        }
+
+        .terminal-header {
+            background: var(--term-header);
+            min-height: 38px;
+            padding: 0 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid var(--term-inner-border);
+            font-size: 12px;
+            color: var(--term-fg-faint);
+            letter-spacing: 0.02em;
+            user-select: none;
+        }
+
+        .terminal-header span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .header-icon {
+            width: 15px;
+            height: 15px;
+            flex-shrink: 0;
+            opacity: 0.8;
+            fill: none;
+            stroke: var(--c-green);
+            stroke-width: 2;
+        }
+
+        main {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--term-fg-intense);
+        }
+
+        .cmd-line {
+            margin: 0;
+            font-weight: 600;
+            overflow-wrap: anywhere;
+        }
+
+        .prompt-user { color: var(--c-green); }
+        .prompt-at,
+        .prompt-dir { color: var(--term-fg-faint); }
+        .prompt-host { color: var(--c-blue); }
+        .prompt-cmd { color: var(--c-magenta); font-weight: 700; }
+
+        .error {
+            margin: 0;
+            color: var(--c-red);
+            overflow-wrap: anywhere;
+        }
+
+        .hint {
+            margin: 0;
+            color: var(--term-fg-faint);
+        }
+
+        .home-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 44px;
+            margin-top: 6px;
+            background: var(--card-bg);
+            border: 1px solid var(--term-inner-border);
+            padding: 10px 14px;
+            color: var(--term-fg);
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
+        }
+
+        .home-link:hover {
+            background: var(--card-hover);
+            border-color: var(--c-magenta);
+            color: var(--term-fg-intense);
+        }
+
+        .home-link .arrow {
+            color: var(--term-fg-faint);
+            transition: color 0.2s;
+        }
+
+        .home-link:hover .arrow {
+            color: var(--c-magenta);
+        }
+
+        footer {
+            border-top: 1px solid var(--term-inner-border);
+            background: var(--term-header);
+            padding: 10px 16px;
+            font-size: 11px;
+            color: var(--term-fg-faint);
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="terminal-container">
+        <div class="terminal-header">
+            <svg class="header-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <polyline points="4 17 10 11 4 5"></polyline>
+                <line x1="12" y1="19" x2="20" y2="19"></line>
+            </svg>
+            <span>ashley@cachyos-desktop-ashley: ~</span>
+        </div>
+
+        <main>
+            <h1>404: page not found</h1>
+
+            <p class="cmd-line">
+                <span class="prompt-user">ashley</span>
+                <span class="prompt-at">@</span>
+                <span class="prompt-host">cachyos</span>
+                <span class="prompt-dir">~&gt;</span>
+                <span class="prompt-cmd">cd <span id="missing-path">this-page</span></span>
+            </p>
+            <p class="error">cd: The directory does not exist</p>
+            <p class="hint">The link may be old, or the address may have a typo.</p>
+
+            <a class="home-link" href="/">
+                <span>cd ~ (back to the homepage)</span>
+                <span class="arrow" aria-hidden="true">&rarr;</span>
+            </a>
+        </main>
+
+        <footer>
+            <span>&copy; Remi / Ashley</span>
+            <span>exit status 404</span>
+        </footer>
+    </div>
+
+    <script>
+        // Echo the requested path in the fake prompt (textContent, so the URL can't inject markup)
+        try {
+            const path = decodeURIComponent(location.pathname);
+            if (path && path !== '/') document.getElementById('missing-path').textContent = path;
+        } catch (e) {
+            console.warn('Could not show the requested path:', e);
+        }
+    </script>
+</body>
+
+</html>
