@@ -63,6 +63,8 @@
             --term-fg: #cfcfcf;
             --term-fg-faint: #8c8c8c;
             --term-fg-intense: #eeeeee;
+            /* Opaque terminal surface (status dot cut-outs, boot footer) */
+            --term-surface: #1c1c1c;
 
             /* System24 exact colors */
             --c-black: #292929;
@@ -74,9 +76,6 @@
             --c-cyan: #6ec9a6;
             --c-white: #cfcfcf;
 
-            --c-red-intense: #f59691;
-            --c-green-intense: #82deb9;
-            --c-yellow-intense: #d7c678;
             --c-blue-intense: #82c8e6;
             --c-magenta-intense: #dca5e6;
             --c-cyan-intense: #82deb9;
@@ -163,7 +162,7 @@
 
         .terminal-container.is-minimized .terminal-body,
         .terminal-container.is-minimized footer {
-            display: none !important;
+            display: none;
         }
 
         .terminal-container.is-maximized {
@@ -208,7 +207,7 @@
 
         .terminal-restore-btn:hover {
             background: var(--c-magenta);
-            color: #141414;
+            color: var(--bg-body);
         }
 
         /* KDE / Klassy Style Titlebar */
@@ -266,12 +265,12 @@
             align-items: center;
             gap: 5px;
             white-space: nowrap;
-            transition: all 0.2s ease;
+            transition: background 0.2s ease, color 0.2s ease;
         }
 
         .mode-toggle-btn:hover {
             background: var(--c-magenta);
-            color: #141414;
+            color: var(--bg-body);
         }
 
         .mode-toggle-btn svg {
@@ -380,24 +379,24 @@
             height: 16px;
             border-radius: 50%;
             background: var(--status-offline);
-            border: 2px solid #1c1c1c;
+            border: 2px solid var(--term-surface);
             transition: background-color 0.3s ease;
         }
 
         /* Non-colour status cue (Discord-style shapes): idle = crescent, dnd = bar, offline = ring */
         .status-indicator[data-status="idle"] {
-            background-image: radial-gradient(circle 5px at 3px 3px, #1c1c1c 95%, transparent 100%);
+            background-image: radial-gradient(circle 5px at 3px 3px, var(--term-surface) 95%, transparent 100%);
         }
 
         .status-indicator[data-status="dnd"] {
-            background-image: linear-gradient(#1c1c1c, #1c1c1c);
+            background-image: linear-gradient(var(--term-surface), var(--term-surface));
             background-size: 8px 3px;
             background-position: center;
             background-repeat: no-repeat;
         }
 
         .status-indicator[data-status="offline"] {
-            background-image: radial-gradient(circle 3px, #1c1c1c 95%, transparent 100%);
+            background-image: radial-gradient(circle 3px, var(--term-surface) 95%, transparent 100%);
         }
 
         .profile-info {
@@ -618,6 +617,15 @@
             border-radius: 0;
         }
 
+        .swatch-black { background: var(--c-black); }
+        .swatch-red { background: var(--c-red); }
+        .swatch-green { background: var(--c-green); }
+        .swatch-yellow { background: var(--c-yellow); }
+        .swatch-blue { background: var(--c-blue); }
+        .swatch-magenta { background: var(--c-magenta); }
+        .swatch-cyan { background: var(--c-cyan); }
+        .swatch-white { background: var(--c-white); }
+
         /* Language Badges */
         .lang-tags {
             display: flex;
@@ -655,6 +663,10 @@
             list-style: none;
             margin: 0;
             padding: 0;
+        }
+
+        .cmd-line + .links-grid {
+            margin-top: 8px;
         }
 
         .links-grid .link-kofi {
@@ -782,6 +794,49 @@
             font-weight: 400;
         }
 
+        .cli-echo {
+            margin-bottom: 4px;
+        }
+
+        .cli-heading {
+            color: var(--c-yellow);
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .cli-title {
+            color: var(--c-magenta);
+            font-weight: 600;
+        }
+
+        .cli-dir {
+            color: var(--c-blue);
+            font-weight: 600;
+        }
+
+        .cli-dim {
+            color: var(--term-fg-faint);
+            margin-top: 2px;
+        }
+
+        .cli-link {
+            text-decoration: underline;
+        }
+
+        .cli-pre {
+            margin: 0;
+            font-family: inherit;
+            color: var(--c-cyan);
+        }
+
+        /* CLI output colours */
+        .fg-red { color: var(--c-red); }
+        .fg-green { color: var(--c-green); }
+        .fg-yellow { color: var(--c-yellow); }
+        .fg-blue { color: var(--c-blue); }
+        .fg-magenta { color: var(--c-magenta); }
+        .fg-cyan { color: var(--c-cyan); }
+
         .cli-cmd-help-table {
             display: grid;
             grid-template-columns: 140px 1fr;
@@ -800,7 +855,7 @@
 
         footer {
             border-top: 1px solid var(--term-inner-border);
-            background: #232323;
+            background: var(--term-header);
             padding: 10px 16px;
             font-size: 11px;
             color: var(--term-fg-faint);
@@ -977,7 +1032,8 @@
             text-decoration: none;
             font-size: 14px;
             font-weight: 500;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: background 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .card-link-item:hover {
@@ -1061,7 +1117,7 @@
         }
 
         .boot-box-header {
-            background: #232323;
+            background: var(--term-header);
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             padding: 10px 16px;
             display: flex;
@@ -1116,7 +1172,7 @@
             align-items: center;
             justify-content: space-between;
             gap: 12px;
-            transition: all 0.15s ease;
+            transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
         }
 
         .boot-opt-btn:hover,
@@ -1183,7 +1239,7 @@
 
         .boot-footer {
             border-top: 1px solid rgba(255, 255, 255, 0.08);
-            background: #1c1c1c;
+            background: var(--term-surface);
             padding: 9px 16px;
             display: flex;
             align-items: center;
@@ -1208,6 +1264,14 @@
             font-size: inherit;
             font-weight: 700;
             margin: 0 0 4px;
+        }
+
+        .card-specs-line {
+            color: var(--term-fg-faint);
+        }
+
+        .card-specs-line + .card-specs-line {
+            margin-top: 2px;
         }
 
         .card-footer-note {
@@ -1394,14 +1458,14 @@
                         </dl>
 
                         <div class="palette-row" aria-hidden="true">
-                            <div class="color-block" style="background:#292929"></div>
-                            <div class="color-block" style="background:#e6837e"></div>
-                            <div class="color-block" style="background:#6ec9a6"></div>
-                            <div class="color-block" style="background:#c2b264"></div>
-                            <div class="color-block" style="background:#6fb8d9"></div>
-                            <div class="color-block" style="background:#cd91d8"></div>
-                            <div class="color-block" style="background:#6ec9a6"></div>
-                            <div class="color-block" style="background:#cfcfcf"></div>
+                            <div class="color-block swatch-black"></div>
+                            <div class="color-block swatch-red"></div>
+                            <div class="color-block swatch-green"></div>
+                            <div class="color-block swatch-yellow"></div>
+                            <div class="color-block swatch-blue"></div>
+                            <div class="color-block swatch-magenta"></div>
+                            <div class="color-block swatch-cyan"></div>
+                            <div class="color-block swatch-white"></div>
                         </div>
                     </div>
                 </div>
@@ -1426,7 +1490,7 @@
 
                 <!-- Links Section -->
                 <div>
-                    <h2 class="cmd-line" style="margin-bottom: 8px;">
+                    <h2 class="cmd-line">
                         <span class="sr-only">Links</span>
                         <span aria-hidden="true" class="prompt-user">ashley</span><span aria-hidden="true" class="prompt-at">@</span><span
                             aria-hidden="true" class="prompt-host">cachyos</span>
@@ -1610,9 +1674,9 @@
 
             <div class="card-specs-preview">
                 <h2 class="card-specs-title">Rig & Setup</h2>
-                <div style="color:var(--term-fg-faint);">CachyOS Linux &bull; i5-13600KF &bull; AMD RX 9070 XT &bull; 32GB
+                <div class="card-specs-line">CachyOS Linux &bull; i5-13600KF &bull; AMD RX 9070 XT &bull; 32GB
                     RAM</div>
-                <div style="color:var(--term-fg-faint); margin-top:2px;">Wooting Two HE &bull; Wacom CTL-480 @ 1000Hz</div>
+                <div class="card-specs-line">Wooting Two HE &bull; Wacom CTL-480 @ 1000Hz</div>
             </div>
 
             <div class="card-footer-note">
@@ -1992,7 +2056,7 @@
 
         function appendPromptEcho(cmdText) {
             appendCliLine(`
-                <div class="cmd-line" style="margin-bottom: 4px;">
+                <div class="cmd-line cli-echo">
                     <span class="prompt-user">ashley</span><span class="prompt-at">@</span><span class="prompt-host">cachyos</span>
                     <span class="prompt-dir">~></span>
                     <span class="prompt-cmd">${escapeHtml(cmdText)}</span>
@@ -2064,7 +2128,7 @@
             switch (cmd) {
                 case 'help':
                     appendCliLine(`
-                        <div style="color: var(--c-yellow); font-weight: 600; margin-bottom: 6px;">Available commands:</div>
+                        <div class="cli-heading">Available commands:</div>
                         <div class="cli-cmd-help-table">
                             <span class="cli-cmd-name">fastfetch</span><span class="cli-cmd-desc">Display hardware & software system info</span>
                             <span class="cli-cmd-name">ls [path]</span><span class="cli-cmd-desc">List directories & files (e.g. ls ./links/)</span>
@@ -2085,8 +2149,8 @@
 
                 case 'whoami':
                     appendCliLine(`
-                        <div><strong style="color:var(--c-green)">ashley</strong> (Remi / Ashley) &bull; UID: 1000</div>
-                        <div style="color:var(--term-fg-faint); margin-top:2px;">Roles: Torii Nova Contributor & Administrator &bull; Linux daily driver</div>
+                        <div><strong class="fg-green">ashley</strong> (Remi / Ashley) &bull; UID: 1000</div>
+                        <div class="cli-dim">Roles: Torii Nova Contributor & Administrator &bull; Linux daily driver</div>
                     `);
                     break;
 
@@ -2114,10 +2178,10 @@
 
                 case 'torii':
                     appendCliLine(`
-                        <div style="color:var(--c-magenta); font-weight:600;">⛩ Torii Nova</div>
-                        <div>Upstream: <a href="https://github.com/ShikkesoraSIM/torii-osu" target="_blank" style="color:var(--c-blue); text-decoration:underline;">github.com/ShikkesoraSIM/torii-osu</a></div>
-                        <div>Profile: <a href="https://torii-web.shikkesora.com/users/96" target="_blank" style="color:var(--c-green); text-decoration:underline;">torii-web.shikkesora.com/users/96</a></div>
-                        <div>Discord: <a href="https://discord.gg/zeuKQquCSE" target="_blank" style="color:var(--c-yellow); text-decoration:underline;">discord.gg/zeuKQquCSE</a></div>
+                        <div class="cli-title">⛩ Torii Nova</div>
+                        <div>Upstream: <a href="https://github.com/ShikkesoraSIM/torii-osu" target="_blank" rel="noopener noreferrer" class="cli-link fg-blue">github.com/ShikkesoraSIM/torii-osu</a></div>
+                        <div>Profile: <a href="https://torii-web.shikkesora.com/users/96" target="_blank" rel="noopener noreferrer" class="cli-link fg-green">torii-web.shikkesora.com/users/96</a></div>
+                        <div>Discord: <a href="https://discord.gg/zeuKQquCSE" target="_blank" rel="noopener noreferrer" class="cli-link fg-yellow">discord.gg/zeuKQquCSE</a></div>
                     `);
                     break;
 
@@ -2125,21 +2189,21 @@
                     const target = (args[0] || '').replace(/^\.?\/?/, '').replace(/\/$/, '');
                     if (target === '' || target === '.') {
                         appendCliLine(`
-                            <span style="color:var(--c-blue); font-weight:600;">links/</span>&nbsp;&nbsp;
-                            <span style="color:var(--c-green);">languages.txt</span>&nbsp;&nbsp;
-                            <span style="color:var(--c-green);">bio.txt</span>&nbsp;&nbsp;
-                            <span style="color:var(--c-yellow);">spec.json</span>
+                            <span class="cli-dir">links/</span>&nbsp;&nbsp;
+                            <span class="fg-green">languages.txt</span>&nbsp;&nbsp;
+                            <span class="fg-green">bio.txt</span>&nbsp;&nbsp;
+                            <span class="fg-yellow">spec.json</span>
                         `);
                     } else if (target === 'links') {
                         appendCliLine(`
-                            <span style="color:var(--c-cyan);">github</span>&nbsp;&nbsp;
-                            <span style="color:var(--c-cyan);">osu-profile</span>&nbsp;&nbsp;
-                            <span style="color:var(--c-cyan);">torii-profile</span>&nbsp;&nbsp;
-                            <span style="color:var(--c-cyan);">torii-discord</span>&nbsp;&nbsp;
-                            <span style="color:var(--c-magenta);">ko-fi</span>
+                            <span class="fg-cyan">github</span>&nbsp;&nbsp;
+                            <span class="fg-cyan">osu-profile</span>&nbsp;&nbsp;
+                            <span class="fg-cyan">torii-profile</span>&nbsp;&nbsp;
+                            <span class="fg-cyan">torii-discord</span>&nbsp;&nbsp;
+                            <span class="fg-magenta">ko-fi</span>
                         `);
                     } else {
-                        appendCliLine(`<span style="color:var(--c-red);">ls: cannot access '${escapeHtml(args[0])}': No such file or directory</span>`);
+                        appendCliLine(`<span class="fg-red">ls: cannot access '${escapeHtml(args[0])}': No such file or directory</span>`);
                     }
                     break;
 
@@ -2150,7 +2214,7 @@
                     } else if (file === 'bio.txt' || file === 'bio') {
                         appendCliLine(escapeHtml(BIO_TEXT));
                     } else if (file === 'spec.json' || file === 'specs') {
-                        appendCliLine(`<pre style="margin:0; font-family:inherit; color:var(--c-cyan);">${escapeHtml(JSON.stringify(readSpecs(), null, 2))}</pre>`);
+                        appendCliLine(`<pre class="cli-pre">${escapeHtml(JSON.stringify(readSpecs(), null, 2))}</pre>`);
                     } else if (file === 'links.txt' || file === 'links') {
                         appendCliLine(`
                             • GitHub: https://github.com/DesireThings<br>
@@ -2160,9 +2224,9 @@
                             • Ko-fi: https://ko-fi.com/desirethings
                         `);
                     } else if (!file) {
-                        appendCliLine(`<span style="color:var(--c-red);">cat: missing file operand</span>`);
+                        appendCliLine(`<span class="fg-red">cat: missing file operand</span>`);
                     } else {
-                        appendCliLine(`<span style="color:var(--c-red);">cat: ${escapeHtml(args[0])}: No such file or directory</span>`);
+                        appendCliLine(`<span class="fg-red">cat: ${escapeHtml(args[0])}: No such file or directory</span>`);
                     }
                     break;
 
@@ -2171,7 +2235,7 @@
                     break;
 
                 default:
-                    appendCliLine(`<span style="color:var(--c-red);">fish: Unknown command: '${escapeHtml(cmd)}'. Type 'help' for available commands.</span>`);
+                    appendCliLine(`<span class="fg-red">fish: Unknown command: '${escapeHtml(cmd)}'. Type 'help' for available commands.</span>`);
                     break;
             }
         }
