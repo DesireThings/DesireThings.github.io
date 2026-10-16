@@ -109,6 +109,15 @@
             }
         }
 
+        /* Single <main> landmark holding whichever view (terminal or card) is active */
+        .views {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
         /* Full Terminal Window (Sharp Corners & Purple Border) */
         .terminal-container {
             max-width: 680px;
@@ -349,6 +358,22 @@
             transition: background-color 0.3s ease;
         }
 
+        /* Non-colour status cue (Discord-style shapes): idle = crescent, dnd = bar, offline = ring */
+        .status-indicator[data-status="idle"] {
+            background-image: radial-gradient(circle 5px at 3px 3px, #1c1c1c 95%, transparent 100%);
+        }
+
+        .status-indicator[data-status="dnd"] {
+            background-image: linear-gradient(#1c1c1c, #1c1c1c);
+            background-size: 8px 3px;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .status-indicator[data-status="offline"] {
+            background-image: radial-gradient(circle 3px, #1c1c1c 95%, transparent 100%);
+        }
+
         .profile-info {
             display: flex;
             flex-direction: column;
@@ -477,6 +502,7 @@
 
         /* Fish / Starship Prompt Line */
         .cmd-line {
+            margin: 0;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -543,7 +569,12 @@
             flex-shrink: 0;
         }
 
+        .fetch-list {
+            margin: 0;
+        }
+
         .fetch-val {
+            margin: 0;
             color: var(--term-fg-intense);
         }
 
@@ -595,6 +626,9 @@
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 10px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
         }
 
         .links-grid .link-kofi {
@@ -888,7 +922,9 @@
             flex-direction: column;
             gap: 10px;
             width: 100%;
-            margin-bottom: 24px;
+            list-style: none;
+            margin: 0 0 24px;
+            padding: 0;
         }
 
         .card-link-item {
@@ -947,21 +983,11 @@
             color: var(--c-yellow);
         }
 
-        /* CachyOS / GRUB styled Bootloader Mode Selector Modal */
-        .boot-modal-backdrop {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
+        /* CachyOS / GRUB styled Bootloader Mode Selector Modal (native <dialog>) */
+        .boot-box::backdrop {
             background: rgba(10, 10, 10, 0.88);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            z-index: 1000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
             animation: fadeIn 0.2s ease-out;
         }
 
@@ -977,16 +1003,23 @@
 
         .boot-box {
             max-width: 580px;
-            width: 100%;
+            width: calc(100% - 40px);
+            padding: 0;
+            color: var(--term-fg);
             background: #181818;
             border: 2px solid var(--term-border);
             border-radius: 0;
             /* Sharp right-angle CachyOS theme */
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(205, 145, 216, 0.2);
-            display: flex;
             flex-direction: column;
-            overflow: hidden;
+            overflow: auto;
             font-family: inherit;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        /* Only lay out as flex while open; a closed <dialog> must keep the UA display: none */
+        .boot-box[open] {
+            display: flex;
         }
 
         .boot-box-header {
@@ -1132,6 +1165,13 @@
             line-height: 1.6;
         }
 
+        .card-specs-title {
+            color: var(--c-yellow);
+            font-size: inherit;
+            font-weight: 700;
+            margin: 0 0 4px;
+        }
+
         .card-footer-note {
             margin-top: 18px;
             font-size: 11px;
@@ -1140,388 +1180,447 @@
             align-items: center;
             gap: 6px;
         }
+
+        /* Reduced motion: stop the pulsing glow, slide-ins, width animation and hover nudges (colour fades stay) */
+        @media (prefers-reduced-motion: reduce) {
+            .ambient-glow,
+            .card-view-container {
+                animation: none;
+            }
+
+            .ambient-glow {
+                opacity: 0.7;
+            }
+
+            .terminal-container {
+                transition: none;
+            }
+
+            .pfp:hover,
+            .card-pfp:hover,
+            .lang-tag:hover,
+            .term-link:hover,
+            .term-link:hover .arrow,
+            .card-link-item:hover,
+            .boot-opt-btn:hover,
+            .boot-opt-btn.is-selected,
+            .terminal-container.is-closed {
+                transform: none;
+            }
+        }
     </style>
 </head>
 
 <body>
     <div class="ambient-glow"></div>
 
-    <main class="terminal-container">
-        <!-- Terminal Header with Klassy / KDE Controls -->
-        <div class="terminal-header">
-            <div class="header-left">
-                <!-- Konsole / Terminal prompt icon -->
-                <svg class="header-icon" viewBox="0 0 24 24">
-                    <polyline points="4 17 10 11 4 5" stroke="currentColor" stroke-width="2" fill="none"></polyline>
-                    <line x1="12" y1="19" x2="20" y2="19" stroke="currentColor" stroke-width="2"></line>
-                </svg>
-                <span>ashley@cachyos-desktop-ashley: ~</span>
-            </div>
-
-            <div class="header-right">
-                <button class="mode-toggle-btn" id="mode-toggle-to-gui" title="Switch to Simple Card View">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M4 4h6v6H4zm10 0h6v6h-6zM4 14h6v6H4zm10 0h6v6h-6z" />
+    <main class="views">
+        <div class="terminal-container">
+            <!-- Terminal Header with Klassy / KDE Controls -->
+            <div class="terminal-header">
+                <div class="header-left">
+                    <!-- Konsole / Terminal prompt icon -->
+                    <svg class="header-icon" viewBox="0 0 24 24">
+                        <polyline points="4 17 10 11 4 5" stroke="currentColor" stroke-width="2" fill="none"></polyline>
+                        <line x1="12" y1="19" x2="20" y2="19" stroke="currentColor" stroke-width="2"></line>
                     </svg>
-                    <span>Simple View</span>
-                </button>
-
-                <div class="terminal-status" id="live-clock">UK &bull; --:--</div>
-
-                <!-- Klassy Window Buttons (Minimize, Maximize/Restore, Close) -->
-                <div class="klassy-buttons" aria-label="Window controls">
-                    <button class="klassy-btn btn-min" id="win-min" title="Minimize / Roll up" aria-label="Minimize">
-                        <svg viewBox="0 0 12 12">
-                            <line x1="2" y1="6" x2="10" y2="6"></line>
-                        </svg>
-                    </button>
-                    <button class="klassy-btn btn-max" id="win-max" title="Maximize / Toggle width"
-                        aria-label="Maximize">
-                        <svg viewBox="0 0 12 12">
-                            <rect x="2" y="2" width="8" height="8"></rect>
-                        </svg>
-                    </button>
-                    <button class="klassy-btn btn-close" id="win-close" title="Close session" aria-label="Close">
-                        <svg viewBox="0 0 12 12">
-                            <line x1="2" y1="2" x2="10" y2="10"></line>
-                            <line x1="10" y1="2" x2="2" y2="10"></line>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="terminal-body">
-            <!-- Profile Info Banner -->
-            <div class="profile-row">
-                <div class="pfp-wrapper">
-                    <div class="pfp">
-                        <img src="https://github.com/DesireThings.png" alt="Profile Picture" width="88" height="88">
-                    </div>
-                    <div class="status-indicator" id="discord-indicator" title="Discord Status" role="img"
-                        aria-label="Discord status: unknown"></div>
+                    <span>ashley@cachyos-desktop-ashley: ~</span>
                 </div>
 
-                <div class="profile-info">
-                    <h1 class="profile-title">
-                        <span>Remi / Ashley</span>
-                    </h1>
+                <div class="header-right">
+                    <button class="mode-toggle-btn" id="mode-toggle-to-gui" title="Switch to Simple Card View">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M4 4h6v6H4zm10 0h6v6h-6zM4 14h6v6H4zm10 0h6v6h-6z" />
+                        </svg>
+                        <span>Simple View</span>
+                    </button>
 
-                    <div class="handles-row">
-                        <!-- GitHub Handle with Mini GitHub Logo -->
-                        <a class="handle-badge" href="https://github.com/DesireThings" target="_blank"
-                            rel="noopener noreferrer" title="GitHub: DesireThings">
-                            <svg viewBox="0 0 24 24" aria-hidden="true">
-                                <path
-                                    d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
-                            </svg>
-                            <span>@DesireThings</span>
-                        </a>
+                    <div class="terminal-status" id="live-clock">UK &bull; --:--</div>
 
-                        <!-- Discord Handle with Mini Discord Logo & Copy action -->
-                        <button class="copy-discord-btn" id="copy-btn" title="Click to copy Discord handle"
-                            aria-label="Copy Discord handle desire_things">
-                            <svg viewBox="0 0 24 24" aria-hidden="true">
-                                <path
-                                    d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
+                    <!-- Klassy Window Buttons (Minimize, Maximize/Restore, Close) -->
+                    <div class="klassy-buttons" aria-label="Window controls">
+                        <button class="klassy-btn btn-min" id="win-min" title="Minimize / Roll up" aria-label="Minimize">
+                            <svg viewBox="0 0 12 12">
+                                <line x1="2" y1="6" x2="10" y2="6"></line>
                             </svg>
-                            <span>desire_things</span>
-                            <span class="copied-tooltip" id="copied-badge">Copied!</span>
+                        </button>
+                        <button class="klassy-btn btn-max" id="win-max" title="Maximize / Toggle width"
+                            aria-label="Maximize">
+                            <svg viewBox="0 0 12 12">
+                                <rect x="2" y="2" width="8" height="8"></rect>
+                            </svg>
+                        </button>
+                        <button class="klassy-btn btn-close" id="win-close" title="Close session" aria-label="Close">
+                            <svg viewBox="0 0 12 12">
+                                <line x1="2" y1="2" x2="10" y2="10"></line>
+                                <line x1="10" y1="2" x2="2" y2="10"></line>
+                            </svg>
                         </button>
                     </div>
-
-                    <p class="bio-text">
-                        Linux enthusiast & CachyOS daily driver. osu! player, Torii Nova contributor, and community
-                        administrator.
-                    </p>
                 </div>
             </div>
 
-            <!-- Discord Activity Card (shown if listening or playing) -->
-            <div class="activity-card" id="activity-box">
-                <div class="activity-header" id="activity-label">Playing</div>
-                <div class="activity-details" id="activity-name">osu!</div>
-            </div>
+            <div class="terminal-body">
+                <!-- Profile Info Banner -->
+                <div class="profile-row">
+                    <div class="pfp-wrapper">
+                        <div class="pfp">
+                            <img src="https://github.com/DesireThings.png" alt="Profile Picture" width="88" height="88">
+                        </div>
+                        <div class="status-indicator" id="discord-indicator" title="Discord Status" role="img"
+                            aria-label="Discord status: unknown"></div>
+                    </div>
 
-            <!-- Fastfetch Section -->
-            <div>
-                <div class="cmd-line">
-                    <span class="prompt-user">ashley</span><span class="prompt-at">@</span><span
-                        class="prompt-host">cachyos</span>
-                    <span class="prompt-dir">~></span>
-                    <span class="prompt-cmd">fastfetch</span>
+                    <div class="profile-info">
+                        <h1 class="profile-title">
+                            <span>Remi / Ashley</span>
+                        </h1>
+
+                        <div class="handles-row">
+                            <!-- GitHub Handle with Mini GitHub Logo -->
+                            <a class="handle-badge" href="https://github.com/DesireThings" target="_blank"
+                                rel="noopener noreferrer" title="GitHub: DesireThings">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path
+                                        d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                                </svg>
+                                <span>@DesireThings</span>
+                            </a>
+
+                            <!-- Discord Handle with Mini Discord Logo & Copy action -->
+                            <button class="copy-discord-btn" id="copy-btn" title="Click to copy Discord handle"
+                                aria-label="Copy Discord handle desire_things">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path
+                                        d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
+                                </svg>
+                                <span>desire_things</span>
+                                <span class="copied-tooltip" id="copied-badge">Copied!</span>
+                            </button>
+                        </div>
+
+                        <p class="bio-text">
+                            Linux enthusiast & CachyOS daily driver. osu! player, Torii Nova contributor, and community
+                            administrator.
+                        </p>
+                    </div>
                 </div>
 
-                <div class="fastfetch-box">
-                    <div class="fetch-header">── Software ──</div>
-                    <div class="fetch-entry"><span class="fetch-key">OS:</span><span class="fetch-val">CachyOS x86_64
-                            (linux-cachyos-bore)</span></div>
-                    <div class="fetch-entry"><span class="fetch-key">Desktop:</span><span class="fetch-val">KDE Plasma 6
-                            (Wayland) &bull; KWin</span></div>
-                    <div class="fetch-entry"><span class="fetch-key">Theme:</span><span class="fetch-val">MateriaDark
-                            (System24) &bull; Klassy</span></div>
-                    <div class="fetch-entry"><span class="fetch-key">Shell:</span><span class="fetch-val">fish &bull;
-                            starship prompt</span></div>
-                    <div class="fetch-entry"><span class="fetch-key">Terminal:</span><span class="fetch-val">Konsole
-                            &bull; antigravity-ide</span></div>
+                <!-- Discord Activity Card (shown if listening or playing) -->
+                <div class="activity-card" id="activity-box">
+                    <div class="activity-header" id="activity-label">Playing</div>
+                    <div class="activity-details" id="activity-name">osu!</div>
+                </div>
 
-                    <div class="fetch-header">── Hardware ──</div>
-                    <div class="fetch-entry"><span class="fetch-key">Motherboard:</span><span class="fetch-val">MSI MAG
-                            Z690 TOMAHAWK WIFI DDR4</span></div>
-                    <div class="fetch-entry"><span class="fetch-key">CPU:</span><span class="fetch-val">13th Gen Intel
-                            Core i5-13600KF (20 threads @ 5.10 GHz)</span></div>
-                    <div class="fetch-entry"><span class="fetch-key">GPU:</span><span class="fetch-val">AMD Radeon RX
-                            9070 XT (16 GB)</span></div>
-                    <div class="fetch-entry"><span class="fetch-key">Memory:</span><span class="fetch-val">32 GB DDR4 @
-                            3200 MT/s</span></div>
-                    <div class="fetch-entry"><span class="fetch-key">Displays:</span><span class="fetch-val">MAG 274QRFW
-                            (1440p @ 180Hz) &bull; E201W (900p @ 60Hz)</span></div>
-                    <div class="fetch-entry"><span class="fetch-key">Peripherals:</span><span class="fetch-val">Wooting
-                            Two HE &bull; CTL-480 @ 1000hz</span></div>
+                <!-- Fastfetch Section -->
+                <div>
+                    <h2 class="cmd-line">
+                        <span class="sr-only">System info</span>
+                        <span aria-hidden="true" class="prompt-user">ashley</span><span aria-hidden="true" class="prompt-at">@</span><span
+                            aria-hidden="true" class="prompt-host">cachyos</span>
+                        <span aria-hidden="true" class="prompt-dir">~></span>
+                        <span aria-hidden="true" class="prompt-cmd">fastfetch</span>
+                    </h2>
 
-                    <div class="palette-row">
-                        <div class="color-block" style="background:#292929"></div>
-                        <div class="color-block" style="background:#e6837e"></div>
-                        <div class="color-block" style="background:#6ec9a6"></div>
-                        <div class="color-block" style="background:#c2b264"></div>
-                        <div class="color-block" style="background:#6fb8d9"></div>
-                        <div class="color-block" style="background:#cd91d8"></div>
-                        <div class="color-block" style="background:#6ec9a6"></div>
-                        <div class="color-block" style="background:#cfcfcf"></div>
+                    <div class="fastfetch-box">
+                        <h3 class="fetch-header"><span aria-hidden="true">── </span>Software<span aria-hidden="true"> ──</span></h3>
+                        <dl class="fetch-list">
+                            <div class="fetch-entry"><dt class="fetch-key">OS:</dt><dd class="fetch-val">CachyOS x86_64
+                                    (linux-cachyos-bore)</dd></div>
+                            <div class="fetch-entry"><dt class="fetch-key">Desktop:</dt><dd class="fetch-val">KDE Plasma 6
+                                    (Wayland) &bull; KWin</dd></div>
+                            <div class="fetch-entry"><dt class="fetch-key">Theme:</dt><dd class="fetch-val">MateriaDark
+                                    (System24) &bull; Klassy</dd></div>
+                            <div class="fetch-entry"><dt class="fetch-key">Shell:</dt><dd class="fetch-val">fish &bull;
+                                    starship prompt</dd></div>
+                            <div class="fetch-entry"><dt class="fetch-key">Terminal:</dt><dd class="fetch-val">Konsole
+                                    &bull; antigravity-ide</dd></div>
+                        </dl>
+
+                        <h3 class="fetch-header"><span aria-hidden="true">── </span>Hardware<span aria-hidden="true"> ──</span></h3>
+                        <dl class="fetch-list">
+                            <div class="fetch-entry"><dt class="fetch-key">Motherboard:</dt><dd class="fetch-val">MSI MAG
+                                    Z690 TOMAHAWK WIFI DDR4</dd></div>
+                            <div class="fetch-entry"><dt class="fetch-key">CPU:</dt><dd class="fetch-val">13th Gen Intel
+                                    Core i5-13600KF (20 threads @ 5.10 GHz)</dd></div>
+                            <div class="fetch-entry"><dt class="fetch-key">GPU:</dt><dd class="fetch-val">AMD Radeon RX
+                                    9070 XT (16 GB)</dd></div>
+                            <div class="fetch-entry"><dt class="fetch-key">Memory:</dt><dd class="fetch-val">32 GB DDR4 @
+                                    3200 MT/s</dd></div>
+                            <div class="fetch-entry"><dt class="fetch-key">Displays:</dt><dd class="fetch-val">MAG 274QRFW
+                                    (1440p @ 180Hz) &bull; E201W (900p @ 60Hz)</dd></div>
+                            <div class="fetch-entry"><dt class="fetch-key">Peripherals:</dt><dd class="fetch-val">Wooting
+                                    Two HE &bull; CTL-480 @ 1000hz</dd></div>
+                        </dl>
+
+                        <div class="palette-row" aria-hidden="true">
+                            <div class="color-block" style="background:#292929"></div>
+                            <div class="color-block" style="background:#e6837e"></div>
+                            <div class="color-block" style="background:#6ec9a6"></div>
+                            <div class="color-block" style="background:#c2b264"></div>
+                            <div class="color-block" style="background:#6fb8d9"></div>
+                            <div class="color-block" style="background:#cd91d8"></div>
+                            <div class="color-block" style="background:#6ec9a6"></div>
+                            <div class="color-block" style="background:#cfcfcf"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Languages / Tech Stack Section -->
+                <div>
+                    <h2 class="cmd-line">
+                        <span class="sr-only">Languages</span>
+                        <span aria-hidden="true" class="prompt-user">ashley</span><span aria-hidden="true" class="prompt-at">@</span><span
+                            aria-hidden="true" class="prompt-host">cachyos</span>
+                        <span aria-hidden="true" class="prompt-dir">~></span>
+                        <span aria-hidden="true" class="prompt-cmd">cat languages.txt</span>
+                    </h2>
+                    <div class="lang-tags">
+                        <button type="button" class="lang-tag">Python</button>
+                        <button type="button" class="lang-tag">C# (.NET)</button>
+                        <button type="button" class="lang-tag">TypeScript</button>
+                        <button type="button" class="lang-tag">JavaScript</button>
+                        <button type="button" class="lang-tag">HTML5 & CSS3</button>
+                    </div>
+                </div>
+
+                <!-- Links Section -->
+                <div>
+                    <h2 class="cmd-line" style="margin-bottom: 8px;">
+                        <span class="sr-only">Links</span>
+                        <span aria-hidden="true" class="prompt-user">ashley</span><span aria-hidden="true" class="prompt-at">@</span><span
+                            aria-hidden="true" class="prompt-host">cachyos</span>
+                        <span aria-hidden="true" class="prompt-dir">~></span>
+                        <span aria-hidden="true" class="prompt-cmd">ls ./links/</span>
+                    </h2>
+
+                    <ul class="links-grid">
+                        <li>
+                            <a class="term-link" href="https://github.com/DesireThings" target="_blank"
+                                rel="noopener noreferrer">
+                                <div class="link-left">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <path
+                                            d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                                    </svg>
+                                    <span>github</span>
+                                </div>
+                                <span class="arrow">&rarr;</span>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a class="term-link" href="https://osu.ppy.sh/users/18473778" target="_blank"
+                                rel="noopener noreferrer">
+                                <div class="link-left">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" />
+                                        <circle cx="12" cy="12" r="5" fill="currentColor" />
+                                    </svg>
+                                    <span>osu-profile</span>
+                                </div>
+                                <span class="arrow">&rarr;</span>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a class="term-link" href="https://torii-web.shikkesora.com/users/96" target="_blank"
+                                rel="noopener noreferrer">
+                                <div class="link-left">
+                                    <svg viewBox="0 0 512 512" aria-hidden="true">
+                                        <path
+                                            d="M376.45 32h-240.9A303.17 303.17 0 0 1 0 0v96c0 17.67 14.33 32 32 32h32v64H16c-8.84 0-16 7.16-16 16v32c0 8.84 7.16 16 16 16h48v240c0 8.84 7.16 16 16 16h32c8.84 0 16-7.16 16-16V256h256v240c0 8.84 7.16 16 16 16h32c8.84 0 16-7.16 16-16V256h48c8.84 0 16-7.16 16-16v-32c0-8.84-7.16-16-16-16h-48v-64h32c17.67 0 32-14.33 32-32V0a303.17 303.17 0 0 1-135.55 32zM128 128h96v64h-96v-64zm256 64h-96v-64h96v64z" />
+                                    </svg>
+                                    <span>torii-profile</span>
+                                </div>
+                                <span class="arrow">&rarr;</span>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a class="term-link" href="https://discord.gg/zeuKQquCSE" target="_blank" rel="noopener noreferrer">
+                                <div class="link-left">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <path
+                                            d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
+                                    </svg>
+                                    <span>torii-discord</span>
+                                </div>
+                                <span class="arrow">&rarr;</span>
+                            </a>
+                        </li>
+
+                        <li class="link-kofi">
+                            <a class="term-link" href="https://ko-fi.com/desirethings" target="_blank"
+                                rel="noopener noreferrer">
+                                <div class="link-left">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <path
+                                            d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 7.324-.022 11.822c.164 2.424 2.586 2.672 2.586 2.672s8.267-.023 11.966-.049c2.438-.426 2.683-2.566 2.658-3.734 4.352.24 7.422-2.831 6.649-6.916zm-11.062 3.511c-1.246 1.453-4.011 3.976-4.011 3.976s-.121.119-.232.119-.232-.119-.232-.119-2.764-2.523-4.01-3.976c-1.255-1.464-1.29-3.237-.179-4.348 1.111-1.11 3.129-1.071 4.421.411 1.293-1.482 3.31-1.521 4.421-.411 1.11 1.111 1.076 2.884-.178 4.348zm6.274-1.205c-.328 1.737-1.748 1.954-1.748 1.954V6.993s1.42.217 1.748 1.954.238 2.072 0 2.307z" />
+                                    </svg>
+                                    <span>ko-fi</span>
+                                </div>
+                                <span class="arrow">&rarr;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Interactive CLI Prompt -->
+                <div class="cli-section" id="cli-container">
+                    <h2 class="sr-only">Interactive terminal</h2>
+                    <div class="cli-history" id="cli-history" role="log" aria-live="polite"></div>
+                    <div class="cli-input-row">
+                        <div class="cli-prompt-prefix">
+                            <span class="prompt-user">ashley</span><span class="prompt-at">@</span><span
+                                class="prompt-host">cachyos</span>
+                            <span class="prompt-dir">~></span>
+                        </div>
+                        <input type="text" class="cli-input" id="terminal-input" autocomplete="off" spellcheck="false"
+                            aria-label="Terminal command" placeholder="type 'help' or any command...">
                     </div>
                 </div>
             </div>
 
-            <!-- Languages / Tech Stack Section -->
-            <div>
-                <div class="cmd-line">
-                    <span class="prompt-user">ashley</span><span class="prompt-at">@</span><span
-                        class="prompt-host">cachyos</span>
-                    <span class="prompt-dir">~></span>
-                    <span class="prompt-cmd">cat languages.txt</span>
-                </div>
-                <div class="lang-tags">
-                    <button type="button" class="lang-tag">Python</button>
-                    <button type="button" class="lang-tag">C# (.NET)</button>
-                    <button type="button" class="lang-tag">TypeScript</button>
-                    <button type="button" class="lang-tag">JavaScript</button>
-                    <button type="button" class="lang-tag">HTML5 & CSS3</button>
-                </div>
+            <!-- Terminal Footer -->
+            <footer>
+                <span>&copy; Remi / Ashley</span>
+                <span>tty1 &bull; System24 &bull; UTF-8</span>
+            </footer>
+        </div>
+
+        <!-- Modern Card / Guns.lol style Bio View -->
+        <section class="card-view-container" id="card-view-container" aria-label="Simple Profile View">
+            <div class="card-top-bar">
+                <button class="mode-toggle-btn" id="mode-toggle-to-term" title="Switch back to Konsole Terminal View">
+                    <svg viewBox="0 0 24 24">
+                        <polyline points="4 17 10 11 4 5" stroke="currentColor" stroke-width="2" fill="none"></polyline>
+                        <line x1="12" y1="19" x2="20" y2="19" stroke="currentColor" stroke-width="2"></line>
+                    </svg>
+                    <span>Terminal View</span>
+                </button>
             </div>
 
-            <!-- Links Section -->
-            <div>
-                <div class="cmd-line" style="margin-bottom: 8px;">
-                    <span class="prompt-user">ashley</span><span class="prompt-at">@</span><span
-                        class="prompt-host">cachyos</span>
-                    <span class="prompt-dir">~></span>
-                    <span class="prompt-cmd">ls ./links/</span>
+            <div class="card-pfp-wrapper">
+                <div class="card-pfp">
+                    <img src="https://github.com/DesireThings.png" alt="Profile Picture" width="104" height="104">
                 </div>
+                <div class="status-indicator" id="card-discord-indicator" title="Discord Status" role="img"
+                    aria-label="Discord status: unknown"></div>
+            </div>
 
-                <div class="links-grid">
-                    <a class="term-link" href="https://github.com/DesireThings" target="_blank"
+            <h1 class="card-name">Remi / Ashley</h1>
+            <div class="card-tagline">@DesireThings &bull; UK</div>
+
+            <p class="card-bio">
+                Linux enthusiast & CachyOS daily driver. osu! player, Torii Nova contributor, and community administrator.
+            </p>
+
+            <div class="card-badges-row">
+                <a class="handle-badge" href="https://github.com/DesireThings" target="_blank" rel="noopener noreferrer">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                            d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                    </svg>
+                    <span>DesireThings</span>
+                </a>
+                <button class="copy-discord-btn" id="card-copy-btn" title="Click to copy Discord handle">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                            d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
+                    </svg>
+                    <span>desire_things</span>
+                    <span class="copied-tooltip" id="card-copied-badge">Copied!</span>
+                </button>
+            </div>
+
+            <h2 class="sr-only">Links</h2>
+            <ul class="card-links-list">
+                <li>
+                    <a class="card-link-item card-link-github" href="https://github.com/DesireThings" target="_blank"
                         rel="noopener noreferrer">
                         <div class="link-left">
                             <svg viewBox="0 0 24 24" aria-hidden="true">
                                 <path
                                     d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
                             </svg>
-                            <span>github</span>
+                            <span>GitHub Profile & Projects</span>
                         </div>
                         <span class="arrow">&rarr;</span>
                     </a>
+                </li>
 
-                    <a class="term-link" href="https://osu.ppy.sh/users/18473778" target="_blank"
+                <li>
+                    <a class="card-link-item card-link-osu" href="https://osu.ppy.sh/users/18473778" target="_blank"
                         rel="noopener noreferrer">
                         <div class="link-left">
                             <svg viewBox="0 0 24 24" aria-hidden="true">
                                 <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" />
                                 <circle cx="12" cy="12" r="5" fill="currentColor" />
                             </svg>
-                            <span>osu-profile</span>
+                            <span>osu! Profile</span>
                         </div>
                         <span class="arrow">&rarr;</span>
                     </a>
+                </li>
 
-                    <a class="term-link" href="https://torii-web.shikkesora.com/users/96" target="_blank"
+                <li>
+                    <a class="card-link-item card-link-torii" href="https://torii-web.shikkesora.com/users/96" target="_blank"
                         rel="noopener noreferrer">
                         <div class="link-left">
                             <svg viewBox="0 0 512 512" aria-hidden="true">
                                 <path
                                     d="M376.45 32h-240.9A303.17 303.17 0 0 1 0 0v96c0 17.67 14.33 32 32 32h32v64H16c-8.84 0-16 7.16-16 16v32c0 8.84 7.16 16 16 16h48v240c0 8.84 7.16 16 16 16h32c8.84 0 16-7.16 16-16V256h256v240c0 8.84 7.16 16 16 16h32c8.84 0 16-7.16 16-16V256h48c8.84 0 16-7.16 16-16v-32c0-8.84-7.16-16-16-16h-48v-64h32c17.67 0 32-14.33 32-32V0a303.17 303.17 0 0 1-135.55 32zM128 128h96v64h-96v-64zm256 64h-96v-64h96v64z" />
                             </svg>
-                            <span>torii-profile</span>
+                            <span>Torii Nova Profile</span>
                         </div>
                         <span class="arrow">&rarr;</span>
                     </a>
+                </li>
 
-                    <a class="term-link" href="https://discord.gg/zeuKQquCSE" target="_blank" rel="noopener noreferrer">
+                <li>
+                    <a class="card-link-item card-link-discord" href="https://discord.gg/zeuKQquCSE" target="_blank"
+                        rel="noopener noreferrer">
                         <div class="link-left">
                             <svg viewBox="0 0 24 24" aria-hidden="true">
                                 <path
                                     d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
                             </svg>
-                            <span>torii-discord</span>
+                            <span>Torii Nova Community Discord</span>
                         </div>
                         <span class="arrow">&rarr;</span>
                     </a>
+                </li>
 
-                    <a class="term-link link-kofi" href="https://ko-fi.com/desirethings" target="_blank"
+                <li>
+                    <a class="card-link-item card-link-kofi" href="https://ko-fi.com/desirethings" target="_blank"
                         rel="noopener noreferrer">
                         <div class="link-left">
                             <svg viewBox="0 0 24 24" aria-hidden="true">
                                 <path
                                     d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 7.324-.022 11.822c.164 2.424 2.586 2.672 2.586 2.672s8.267-.023 11.966-.049c2.438-.426 2.683-2.566 2.658-3.734 4.352.24 7.422-2.831 6.649-6.916zm-11.062 3.511c-1.246 1.453-4.011 3.976-4.011 3.976s-.121.119-.232.119-.232-.119-.232-.119-2.764-2.523-4.01-3.976c-1.255-1.464-1.29-3.237-.179-4.348 1.111-1.11 3.129-1.071 4.421.411 1.293-1.482 3.31-1.521 4.421-.411 1.11 1.111 1.076 2.884-.178 4.348zm6.274-1.205c-.328 1.737-1.748 1.954-1.748 1.954V6.993s1.42.217 1.748 1.954.238 2.072 0 2.307z" />
                             </svg>
-                            <span>ko-fi</span>
+                            <span>Support on Ko-fi</span>
                         </div>
                         <span class="arrow">&rarr;</span>
                     </a>
-                </div>
+                </li>
+            </ul>
+
+            <div class="card-specs-preview">
+                <h2 class="card-specs-title">Rig & Setup</h2>
+                <div style="color:var(--term-fg-faint);">CachyOS Linux &bull; i5-13600KF &bull; AMD RX 9070 XT &bull; 32GB
+                    RAM</div>
+                <div style="color:var(--term-fg-faint); margin-top:2px;">Wooting Two HE &bull; Wacom CTL-480 @ 1000Hz</div>
             </div>
 
-            <!-- Interactive CLI Prompt -->
-            <div class="cli-section" id="cli-container">
-                <div class="cli-history" id="cli-history" role="log" aria-live="polite"></div>
-                <div class="cli-input-row">
-                    <div class="cli-prompt-prefix">
-                        <span class="prompt-user">ashley</span><span class="prompt-at">@</span><span
-                            class="prompt-host">cachyos</span>
-                        <span class="prompt-dir">~></span>
-                    </div>
-                    <input type="text" class="cli-input" id="terminal-input" autocomplete="off" spellcheck="false"
-                        aria-label="Terminal command" placeholder="type 'help' or any command...">
-                </div>
+            <div class="card-footer-note">
+                <span>&copy; Remi / Ashley</span>
+                <span>&bull;</span>
+                <span>CachyOS System24</span>
             </div>
-        </div>
-
-        <!-- Terminal Footer -->
-        <footer>
-            <span>&copy; Remi / Ashley</span>
-            <span>tty1 &bull; System24 &bull; UTF-8</span>
-        </footer>
+        </section>
     </main>
-
-    <!-- Modern Card / Guns.lol style Bio View -->
-    <section class="card-view-container" id="card-view-container" aria-label="Simple Profile View">
-        <div class="card-top-bar">
-            <button class="mode-toggle-btn" id="mode-toggle-to-term" title="Switch back to Konsole Terminal View">
-                <svg viewBox="0 0 24 24">
-                    <polyline points="4 17 10 11 4 5" stroke="currentColor" stroke-width="2" fill="none"></polyline>
-                    <line x1="12" y1="19" x2="20" y2="19" stroke="currentColor" stroke-width="2"></line>
-                </svg>
-                <span>Terminal View</span>
-            </button>
-        </div>
-
-        <div class="card-pfp-wrapper">
-            <div class="card-pfp">
-                <img src="https://github.com/DesireThings.png" alt="Profile Picture" width="104" height="104">
-            </div>
-            <div class="status-indicator" id="card-discord-indicator" title="Discord Status" role="img"
-                aria-label="Discord status: unknown"></div>
-        </div>
-
-        <h1 class="card-name">Remi / Ashley</h1>
-        <div class="card-tagline">@DesireThings &bull; UK</div>
-
-        <p class="card-bio">
-            Linux enthusiast & CachyOS daily driver. osu! player, Torii Nova contributor, and community administrator.
-        </p>
-
-        <div class="card-badges-row">
-            <a class="handle-badge" href="https://github.com/DesireThings" target="_blank" rel="noopener noreferrer">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path
-                        d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
-                </svg>
-                <span>DesireThings</span>
-            </a>
-            <button class="copy-discord-btn" id="card-copy-btn" title="Click to copy Discord handle">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path
-                        d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
-                </svg>
-                <span>desire_things</span>
-                <span class="copied-tooltip" id="card-copied-badge">Copied!</span>
-            </button>
-        </div>
-
-        <div class="card-links-list">
-            <a class="card-link-item card-link-github" href="https://github.com/DesireThings" target="_blank"
-                rel="noopener noreferrer">
-                <div class="link-left">
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <path
-                            d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
-                    </svg>
-                    <span>GitHub Profile & Projects</span>
-                </div>
-                <span class="arrow">&rarr;</span>
-            </a>
-
-            <a class="card-link-item card-link-osu" href="https://osu.ppy.sh/users/18473778" target="_blank"
-                rel="noopener noreferrer">
-                <div class="link-left">
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" />
-                        <circle cx="12" cy="12" r="5" fill="currentColor" />
-                    </svg>
-                    <span>osu! Profile</span>
-                </div>
-                <span class="arrow">&rarr;</span>
-            </a>
-
-            <a class="card-link-item card-link-torii" href="https://torii-web.shikkesora.com/users/96" target="_blank"
-                rel="noopener noreferrer">
-                <div class="link-left">
-                    <svg viewBox="0 0 512 512" aria-hidden="true">
-                        <path
-                            d="M376.45 32h-240.9A303.17 303.17 0 0 1 0 0v96c0 17.67 14.33 32 32 32h32v64H16c-8.84 0-16 7.16-16 16v32c0 8.84 7.16 16 16 16h48v240c0 8.84 7.16 16 16 16h32c8.84 0 16-7.16 16-16V256h256v240c0 8.84 7.16 16 16 16h32c8.84 0 16-7.16 16-16V256h48c8.84 0 16-7.16 16-16v-32c0-8.84-7.16-16-16-16h-48v-64h32c17.67 0 32-14.33 32-32V0a303.17 303.17 0 0 1-135.55 32zM128 128h96v64h-96v-64zm256 64h-96v-64h96v64z" />
-                    </svg>
-                    <span>Torii Nova Profile</span>
-                </div>
-                <span class="arrow">&rarr;</span>
-            </a>
-
-            <a class="card-link-item card-link-discord" href="https://discord.gg/zeuKQquCSE" target="_blank"
-                rel="noopener noreferrer">
-                <div class="link-left">
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <path
-                            d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
-                    </svg>
-                    <span>Torii Nova Community Discord</span>
-                </div>
-                <span class="arrow">&rarr;</span>
-            </a>
-
-            <a class="card-link-item card-link-kofi" href="https://ko-fi.com/desirethings" target="_blank"
-                rel="noopener noreferrer">
-                <div class="link-left">
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <path
-                            d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 7.324-.022 11.822c.164 2.424 2.586 2.672 2.586 2.672s8.267-.023 11.966-.049c2.438-.426 2.683-2.566 2.658-3.734 4.352.24 7.422-2.831 6.649-6.916zm-11.062 3.511c-1.246 1.453-4.011 3.976-4.011 3.976s-.121.119-.232.119-.232-.119-.232-.119-2.764-2.523-4.01-3.976c-1.255-1.464-1.29-3.237-.179-4.348 1.111-1.11 3.129-1.071 4.421.411 1.293-1.482 3.31-1.521 4.421-.411 1.11 1.111 1.076 2.884-.178 4.348zm6.274-1.205c-.328 1.737-1.748 1.954-1.748 1.954V6.993s1.42.217 1.748 1.954.238 2.072 0 2.307z" />
-                    </svg>
-                    <span>Support on Ko-fi</span>
-                </div>
-                <span class="arrow">&rarr;</span>
-            </a>
-        </div>
-
-        <div class="card-specs-preview">
-            <div style="color:var(--c-yellow); font-weight:700; margin-bottom:4px;">Rig & Setup</div>
-            <div style="color:var(--term-fg-faint);">CachyOS Linux &bull; i5-13600KF &bull; AMD RX 9070 XT &bull; 32GB
-                RAM</div>
-            <div style="color:var(--term-fg-faint); margin-top:2px;">Wooting Two HE &bull; Wacom CTL-480 @ 1000Hz</div>
-        </div>
-
-        <div class="card-footer-note">
-            <span>&copy; Remi / Ashley</span>
-            <span>&bull;</span>
-            <span>CachyOS System24</span>
-        </div>
-    </section>
 
     <span class="sr-only" id="copy-status" role="status"></span>
 
@@ -1531,47 +1630,45 @@
     </div>
 
     <!-- CachyOS Bootloader (GRUB) Style First-time Mode Selector Modal -->
-    <div class="boot-modal-backdrop" id="boot-modal" role="dialog" aria-modal="true" aria-labelledby="boot-title">
-        <div class="boot-box">
-            <div class="boot-box-header">
-                <span class="boot-title" id="boot-title">CachyOS GRUB Boot Menu &bull; Version 2.12</span>
-                <span>Select Environment</span>
-            </div>
-            <div class="boot-body">
-                <p class="boot-msg">
-                    Select how you would like to load <strong>Remi / Ashley's</strong> portfolio:
-                </p>
-                <div class="boot-options">
-                    <button class="boot-opt-btn is-selected" id="boot-opt-term" data-mode="terminal">
-                        <div class="boot-opt-main">
-                            <span class="boot-opt-key">[ 1 ]</span>
-                            <div class="boot-opt-text">
-                                <div class="boot-opt-title">CachyOS Konsole Terminal (System24)</div>
-                                <div class="boot-opt-desc">Full interactive CLI with fastfetch, fish prompt & commands
-                                </div>
+    <dialog class="boot-box" id="boot-modal" aria-labelledby="boot-title">
+        <div class="boot-box-header">
+            <span class="boot-title" id="boot-title">CachyOS GRUB Boot Menu &bull; Version 2.12</span>
+            <span>Select Environment</span>
+        </div>
+        <div class="boot-body">
+            <p class="boot-msg">
+                Select how you would like to load <strong>Remi / Ashley's</strong> portfolio:
+            </p>
+            <div class="boot-options">
+                <button class="boot-opt-btn is-selected" id="boot-opt-term" data-mode="terminal" autofocus>
+                    <div class="boot-opt-main">
+                        <span class="boot-opt-key">[ 1 ]</span>
+                        <div class="boot-opt-text">
+                            <div class="boot-opt-title">CachyOS Konsole Terminal (System24)</div>
+                            <div class="boot-opt-desc">Full interactive CLI with fastfetch, fish prompt & commands
                             </div>
                         </div>
-                        <span class="boot-opt-tag">Default</span>
-                    </button>
+                    </div>
+                    <span class="boot-opt-tag">Default</span>
+                </button>
 
-                    <button class="boot-opt-btn" id="boot-opt-card" data-mode="card">
-                        <div class="boot-opt-main">
-                            <span class="boot-opt-key">[ 2 ]</span>
-                            <div class="boot-opt-text">
-                                <div class="boot-opt-title">Simple Card Bio View (guns.lol style)</div>
-                                <div class="boot-opt-desc">Clean modern bio card with direct clickable link buttons
-                                </div>
+                <button class="boot-opt-btn" id="boot-opt-card" data-mode="card">
+                    <div class="boot-opt-main">
+                        <span class="boot-opt-key">[ 2 ]</span>
+                        <div class="boot-opt-text">
+                            <div class="boot-opt-title">Simple Card Bio View (guns.lol style)</div>
+                            <div class="boot-opt-desc">Clean modern bio card with direct clickable link buttons
                             </div>
                         </div>
-                        <span class="boot-opt-tag">GUI</span>
-                    </button>
-                </div>
-            </div>
-            <div class="boot-footer">
-                <span>Use keyboard keys 1 or 2, Enter, or click to boot. Choice is remembered.</span>
+                    </div>
+                    <span class="boot-opt-tag">GUI</span>
+                </button>
             </div>
         </div>
-    </div>
+        <div class="boot-footer">
+            <span>Use keyboard keys 1 or 2, Enter, or click to boot. Choice is remembered.</span>
+        </div>
+    </dialog>
 
     <script>
         // Live UK Clock
@@ -1656,7 +1753,7 @@
                 if (cardEl) cardEl.style.display = 'none';
                 if (save) localStorage.setItem('profile_view_mode', 'terminal');
             }
-            if (bootModal) bootModal.style.display = 'none';
+            if (bootModal && bootModal.open) bootModal.close();
         }
 
         if (modeToggleToGui) {
@@ -1674,9 +1771,8 @@
             bootOptCard.addEventListener('click', () => setViewMode('card'));
         }
 
-        let selectedBootIndex = 0; // 0 = Terminal, 1 = Card
+        // Highlight follows focus, so Enter/Space (native button activation) boots the highlighted option
         function updateBootSelection(index) {
-            selectedBootIndex = index;
             if (bootOptTerm && bootOptCard) {
                 if (index === 0) {
                     bootOptTerm.classList.add('is-selected');
@@ -1688,21 +1784,23 @@
             }
         }
 
+        if (bootOptTerm && bootOptCard) {
+            bootOptTerm.addEventListener('focus', () => updateBootSelection(0));
+            bootOptCard.addEventListener('focus', () => updateBootSelection(1));
+        }
+
         window.addEventListener('keydown', (e) => {
-            if (bootModal && bootModal.style.display === 'flex') {
+            if (bootModal && bootModal.open) {
                 if (e.key === '1') {
                     setViewMode('terminal');
                 } else if (e.key === '2') {
                     setViewMode('card');
                 } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
                     e.preventDefault();
-                    updateBootSelection(0);
+                    if (bootOptTerm) bootOptTerm.focus();
                 } else if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
                     e.preventDefault();
-                    updateBootSelection(1);
-                } else if (e.key === 'Enter') {
-                    e.preventDefault();
-                    setViewMode(selectedBootIndex === 0 ? 'terminal' : 'card');
+                    if (bootOptCard) bootOptCard.focus();
                 }
             }
         });
@@ -1716,8 +1814,9 @@
                 setViewMode('terminal', false);
             } else {
                 // First time visitor: show CachyOS GRUB bootloader menu
-                if (bootModal) {
-                    bootModal.style.display = 'flex';
+                // (Esc closes it natively and leaves the default terminal view, without saving a choice)
+                if (bootModal && typeof bootModal.showModal === 'function') {
+                    bootModal.showModal();
                 }
             }
         } catch (e) { }
@@ -1735,12 +1834,14 @@
                 offline: 'var(--status-offline)'
             };
             const chosenColor = colors[status] || colors.offline;
+            const shapeStatus = colors[status] ? status : 'offline';
 
             const indicator = document.getElementById('discord-indicator');
             if (indicator) {
                 indicator.style.backgroundColor = chosenColor;
                 indicator.title = `Discord: ${status}`;
                 indicator.setAttribute('aria-label', `Discord status: ${status}`);
+                indicator.dataset.status = shapeStatus;
             }
 
             const cardIndicator = document.getElementById('card-discord-indicator');
@@ -1748,6 +1849,7 @@
                 cardIndicator.style.backgroundColor = chosenColor;
                 cardIndicator.title = `Discord: ${status}`;
                 cardIndicator.setAttribute('aria-label', `Discord status: ${status}`);
+                cardIndicator.dataset.status = shapeStatus;
             }
 
             // Activity display
@@ -1882,7 +1984,8 @@
             cliHistory.appendChild(line);
             // Smoothly keep the latest prompt in view if container overflows
             if (cliContainer) {
-                cliContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                cliContainer.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' });
             }
         }
 
