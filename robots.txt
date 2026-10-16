@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://desirethings.github.io/sitemap.xml
