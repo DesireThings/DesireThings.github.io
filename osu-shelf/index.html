@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>osu-shelf: osu!collector collections in osu! | DesireThings</title>
+    <meta name="description"
+        content="osu-shelf downloads osu!collector collections from public beatmap mirrors and gets them into osu!lazer or osu! stable, from a desktop app or your terminal. No osu! login needed.">
+    <meta name="theme-color" content="#1c1c1c">
+    <link rel="canonical" href="https://desirethings.github.io/osu-shelf/">
+
+    <!-- Open Graph / Discord embeds -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="DesireThings">
+    <meta property="og:locale" content="en_GB">
+    <meta property="og:url" content="https://desirethings.github.io/osu-shelf/">
+    <meta property="og:title" content="osu-shelf: osu!collector collections in osu!">
+    <meta property="og:description"
+        content="Download osu!collector collections and get them into osu!, from a desktop app or your terminal. Nine mirrors with failover, a verified collection.db, no osu! login.">
+    <meta property="og:image" content="https://raw.githubusercontent.com/DesireThings/osu-shelf/main/media/desktop-add-collections.png">
+    <meta property="og:image:alt" content="The osu-shelf desktop app downloading two osu!collector collections">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="osu-shelf: osu!collector collections in osu!">
+    <meta name="twitter:description"
+        content="Download osu!collector collections and get them into osu!, from a desktop app or your terminal. Nine mirrors with failover, a verified collection.db, no osu! login.">
+    <meta name="twitter:image" content="https://raw.githubusercontent.com/DesireThings/osu-shelf/main/media/desktop-add-collections.png">
+    <meta name="twitter:image:alt" content="The osu-shelf desktop app downloading two osu!collector collections">
+
+    <!-- Structured data for search engines -->
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            "name": "osu-shelf",
+            "alternateName": "osu-collect",
+            "url": "https://desirethings.github.io/osu-shelf/",
+            "downloadUrl": "https://github.com/DesireThings/osu-shelf/releases/latest",
+            "softwareVersion": "0.2.0",
+            "applicationCategory": "UtilitiesApplication",
+            "operatingSystem": "Linux, Windows, macOS",
+            "license": "https://github.com/DesireThings/osu-shelf#license",
+            "author": {
+                "@type": "Person",
+                "name": "Remi / Ashley",
+                "url": "https://desirethings.github.io/"
+            }
+        }
+    </script>
+
+    <link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/91154340?s=64&v=4">
+    <!-- Root-absolute paths, like 404.html: the fonts live at the site root, not under /osu-shelf/ -->
+    <link rel="preload" href="/fonts/dm-mono-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/dm-mono-500-latin.woff2" as="font" type="font/woff2" crossorigin>
+
+    <style>
+        /* Same self-hosted DM Mono and System24 palette as index.html */
+        @font-face {
+            font-family: "DM Mono";
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url("/fonts/dm-mono-400-latin.woff2") format("woff2");
+            unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+        }
+
+        @font-face {
+            font-family: "DM Mono";
+            font-style: normal;
+            font-weight: 500;
+            font-display: swap;
+            src: url("/fonts/dm-mono-500-latin.woff2") format("woff2");
+            unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+        }
+
+        :root {
+            --bg-body: #141414;
+            --term-bg: rgba(28, 28, 28, 0.94);
+            --term-border: #cd91d8;
+            --term-inner-border: rgba(255, 255, 255, 0.08);
+            --term-header: #232323;
+            --term-fg: #cfcfcf;
+            --term-fg-faint: #8c8c8c;
+            --term-fg-intense: #eeeeee;
+            --c-red: #e6837e;
+            --c-green: #6ec9a6;
+            --c-yellow: #c2b264;
+            --c-blue: #6fb8d9;
+            --c-magenta: #cd91d8;
+            --c-magenta-intense: #dca5e6;
+            --card-bg: rgba(35, 35, 35, 0.7);
+            --card-hover: rgba(45, 45, 45, 0.95);
+            --code-bg: rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        /* One consistent focus ring for every control against the dark / magenta palette */
+        :focus-visible {
+            outline: 2px solid var(--c-magenta);
+            outline-offset: 2px;
+        }
+
+        /* In-page jumps glide, unless the visitor asked for less motion */
+        @media (prefers-reduced-motion: no-preference) {
+            html {
+                scroll-behavior: smooth;
+            }
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--term-fg);
+            font-family: "DM Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 0;
+            padding: 32px 16px;
+            min-height: 100vh;
+            min-height: 100dvh;
+            overflow-x: hidden;
+        }
+
+        a {
+            color: var(--c-blue);
+            text-underline-offset: 3px;
+        }
+
+        a:hover {
+            color: var(--term-fg-intense);
+        }
+
+        code {
+            font-family: inherit;
+            color: var(--c-yellow);
+        }
+
+        /* Skip link: off-screen until focused, then pinned over the titlebar */
+        .skip-link {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            z-index: 10;
+            display: inline-flex;
+            align-items: center;
+            min-height: 44px;
+            padding: 0 14px;
+            background: var(--c-magenta);
+            color: var(--bg-body);
+            font-weight: 500;
+            text-decoration: none;
+            transform: translateY(-200%);
+        }
+
+        .skip-link:focus {
+            transform: none;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Hidden container for the <symbol> icon sprite */
+        .svg-sprite {
+            position: absolute;
+            width: 0;
+            height: 0;
+            overflow: hidden;
+        }
+
+        /* Terminal window: sharp corners, magenta border, product layout inside */
+        .terminal-container {
+            max-width: 960px;
+            margin: 0 auto;
+            background: var(--term-bg);
+            border: 1.5px solid var(--term-border);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(205, 145, 216, 0.15);
+        }
+
+        /* KDE / Klassy style titlebar */
+        .terminal-header {
+            background: var(--term-header);
+            min-height: 38px;
+            padding: 0 8px 0 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            border-bottom: 1px solid var(--term-inner-border);
+            font-size: 12px;
+            color: var(--term-fg-faint);
+            letter-spacing: 0.02em;
+            user-select: none;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .header-left span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .header-icon {
+            width: 15px;
+            height: 15px;
+            flex-shrink: 0;
+            opacity: 0.8;
+            color: var(--c-green);
+        }
+
+        .header-home {
+            display: inline-flex;
+            align-items: center;
+            min-height: 28px;
+            padding: 0 10px;
+            flex-shrink: 0;
+            color: var(--c-magenta);
+            text-decoration: none;
+            border: 1px solid rgba(205, 145, 216, 0.3);
+            background: rgba(205, 145, 216, 0.12);
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .header-home:hover {
+            background: var(--c-magenta);
+            color: var(--bg-body);
+        }
+
+        /* Konsole-style tab strip doubling as the page nav */
+        .tab-bar {
+            display: flex;
+            flex-wrap: wrap;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            background: rgba(0, 0, 0, 0.25);
+            border-bottom: 1px solid var(--term-inner-border);
+        }
+
+        .tab-bar a {
+            display: inline-flex;
+            align-items: center;
+            min-height: 36px;
+            padding: 0 14px;
+            font-size: 12px;
+            color: var(--term-fg-faint);
+            text-decoration: none;
+            border-right: 1px solid var(--term-inner-border);
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .tab-bar a:hover {
+            background: var(--card-hover);
+            color: var(--term-fg-intense);
+        }
+
+        .window-body {
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 48px;
+        }
+
+        /* Sections: faint prompt line above a plain heading */
+        section {
+            scroll-margin-top: 16px;
+        }
+
+        .cmd-line {
+            margin: 0 0 4px;
+            font-size: 12px;
+            font-weight: 600;
+            overflow-wrap: anywhere;
+        }
+
+        .prompt-user { color: var(--c-green); }
+        .prompt-at,
+        .prompt-dir { color: var(--term-fg-faint); }
+        .prompt-host { color: var(--c-blue); }
+        .prompt-cmd { color: var(--c-magenta); font-weight: 700; }
+
+        h1,
+        h2,
+        h3 {
+            color: var(--term-fg-intense);
+            line-height: 1.25;
+        }
+
+        h2 {
+            margin: 0 0 16px;
+            font-size: 20px;
+        }
+
+        h3 {
+            margin: 0 0 6px;
+            font-size: 15px;
+        }
+
+        p {
+            margin: 0 0 12px;
+        }
+
+        .muted {
+            color: var(--term-fg-faint);
+        }
+
+        /* Hero: pitch on the left, `whoami` card on the right */
+        .hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+            gap: 32px;
+            align-items: start;
+        }
+
+        .hero h1 {
+            margin: 4px 0 12px;
+            font-size: 34px;
+            letter-spacing: -0.01em;
+        }
+
+        .hero-promise {
+            font-size: 17px;
+            color: var(--term-fg-intense);
+        }
+
+        .button-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0 16px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 44px;
+            padding: 0 16px;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            border: 1px solid var(--term-inner-border);
+            background: var(--card-bg);
+            color: var(--term-fg-intense);
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
+        }
+
+        .btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+            flex-shrink: 0;
+        }
+
+        .btn:hover {
+            background: var(--card-hover);
+            border-color: var(--c-magenta);
+            color: var(--term-fg-intense);
+        }
+
+        .btn-primary {
+            background: var(--c-magenta);
+            border-color: var(--c-magenta);
+            color: var(--bg-body);
+        }
+
+        .btn-primary:hover {
+            background: var(--c-magenta-intense);
+            border-color: var(--c-magenta-intense);
+            color: var(--bg-body);
+        }
+
+        .disclaimer {
+            font-size: 12px;
+            color: var(--term-fg-faint);
+            margin: 0;
+        }
+
+        /* `whoami` key/value card (fastfetch box from index.html) */
+        .whoami {
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 14px 16px;
+            font-size: 12.5px;
+        }
+
+        .whoami .cmd-line {
+            margin-bottom: 10px;
+        }
+
+        .whoami dl {
+            margin: 0;
+        }
+
+        .whoami-entry {
+            display: flex;
+            gap: 10px;
+            padding: 2px 0;
+        }
+
+        .whoami dt {
+            color: var(--c-magenta);
+            font-weight: 600;
+            min-width: 88px;
+            flex-shrink: 0;
+        }
+
+        .whoami dd {
+            margin: 0;
+            color: var(--term-fg-intense);
+            overflow-wrap: anywhere;
+        }
+
+        /* Screenshots */
+        .shots {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        figure {
+            margin: 0;
+        }
+
+        .shots img {
+            display: block;
+            width: 100%;
+            height: auto;
+            border: 1px solid var(--term-inner-border);
+            background: #111;
+        }
+
+        figcaption {
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--term-fg-faint);
+        }
+
+        /* Install: command blocks with a copy button each */
+        .install-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 24px;
+        }
+
+        .panel {
+            background: var(--card-bg);
+            border: 1px solid var(--term-inner-border);
+            padding: 18px;
+            min-width: 0;
+        }
+
+        .cmd-label {
+            margin: 14px 0 6px;
+            font-size: 12px;
+            color: var(--term-fg-faint);
+        }
+
+        .code-block {
+            display: flex;
+            align-items: stretch;
+            background: var(--code-bg);
+            border: 1px solid var(--term-inner-border);
+        }
+
+        /* Long one-liners wrap instead of scrolling; the copy button always takes the exact text */
+        .code-block pre {
+            flex: 1;
+            min-width: 0;
+            margin: 0;
+            padding: 10px 12px;
+            font-family: inherit;
+            font-size: 12px;
+            line-height: 1.55;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .code-block code {
+            color: var(--c-green);
+        }
+
+        .copy-btn {
+            flex-shrink: 0;
+            min-width: 72px;
+            min-height: 44px;
+            padding: 0 12px;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 500;
+            background: rgba(205, 145, 216, 0.12);
+            color: var(--c-magenta);
+            border: none;
+            border-left: 1px solid var(--term-inner-border);
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: var(--c-magenta);
+            color: var(--bg-body);
+        }
+
+        .copy-btn.is-copied {
+            color: var(--c-green);
+        }
+
+        .copy-btn.is-copied:hover {
+            color: var(--bg-body);
+            background: var(--c-green);
+        }
+
+        .file-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12.5px;
+            margin: 6px 0 14px;
+        }
+
+        .file-table th,
+        .file-table td {
+            text-align: left;
+            vertical-align: top;
+            padding: 6px 8px 6px 0;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+        }
+
+        .file-table th {
+            color: var(--term-fg-faint);
+            font-weight: 500;
+        }
+
+        .file-table td code {
+            overflow-wrap: anywhere;
+        }
+
+        .note {
+            font-size: 12.5px;
+            color: var(--term-fg-faint);
+            border-left: 2px solid var(--c-yellow);
+            padding-left: 10px;
+            margin: 12px 0 0;
+        }
+
+        /* Features and steps: card grids */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .card-grid > li {
+            background: var(--card-bg);
+            border: 1px solid var(--term-inner-border);
+            padding: 16px;
+        }
+
+        .card-grid p {
+            margin: 0;
+            font-size: 13px;
+            color: var(--term-fg);
+        }
+
+        .feature-tag {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 11px;
+            color: var(--c-green);
+        }
+
+        .steps {
+            counter-reset: step;
+        }
+
+        .steps > li {
+            counter-increment: step;
+        }
+
+        .steps > li::before {
+            content: "0" counter(step);
+            display: block;
+            margin-bottom: 6px;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--c-magenta);
+        }
+
+        /* FAQ: native <details>, so it works without JS and with every screen reader */
+        .faq {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .faq details {
+            background: var(--card-bg);
+            border: 1px solid var(--term-inner-border);
+        }
+
+        .faq details[open] {
+            border-color: rgba(205, 145, 216, 0.4);
+        }
+
+        .faq summary {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 44px;
+            padding: 8px 14px;
+            color: var(--term-fg-intense);
+            font-weight: 500;
+            cursor: pointer;
+            list-style: none;
+        }
+
+        .faq summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .faq summary::before {
+            content: ">";
+            color: var(--c-magenta);
+            flex-shrink: 0;
+            transition: transform 0.2s;
+        }
+
+        .faq details[open] summary::before {
+            transform: rotate(90deg);
+        }
+
+        .faq details p {
+            margin: 0;
+            padding: 0 14px 14px 32px;
+            font-size: 13px;
+        }
+
+        /* Docs and community: link rows from index.html */
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .term-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            min-height: 44px;
+            height: 100%;
+            background: var(--card-bg);
+            border: 1px solid var(--term-inner-border);
+            padding: 10px 14px;
+            color: var(--term-fg);
+            text-decoration: none;
+            font-size: 13px;
+            transition: background 0.2s, border-color 0.2s, transform 0.2s, color 0.2s;
+        }
+
+        .term-link:hover {
+            background: var(--card-hover);
+            border-color: var(--c-magenta);
+            transform: translateY(-2px);
+            color: var(--term-fg-intense);
+        }
+
+        .link-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .link-left svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+            flex-shrink: 0;
+        }
+
+        .link-text {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .link-name {
+            color: var(--term-fg-intense);
+            font-weight: 500;
+        }
+
+        .link-desc {
+            font-size: 12px;
+            color: var(--term-fg-faint);
+        }
+
+        .arrow {
+            color: var(--term-fg-faint);
+            flex-shrink: 0;
+            transition: color 0.2s, transform 0.2s;
+        }
+
+        .term-link:hover .arrow {
+            color: var(--c-magenta);
+            transform: translateX(3px);
+        }
+
+        /* Placeholder row for links that don't exist yet: not a link, not focusable */
+        .term-link.is-placeholder {
+            border-style: dashed;
+            color: var(--term-fg-faint);
+        }
+
+        .term-link.is-placeholder:hover {
+            background: var(--card-bg);
+            border-color: var(--term-inner-border);
+            color: var(--term-fg-faint);
+            transform: none;
+        }
+
+        .term-link.is-placeholder .link-name {
+            color: var(--term-fg-faint);
+        }
+
+        .soon-badge {
+            flex-shrink: 0;
+            font-size: 11px;
+            color: var(--c-yellow);
+            border: 1px solid rgba(194, 178, 100, 0.4);
+            padding: 1px 6px;
+        }
+
+        footer {
+            border-top: 1px solid var(--term-inner-border);
+            background: var(--term-header);
+            padding: 10px 16px;
+            font-size: 11px;
+            color: var(--term-fg-faint);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 6px 12px;
+        }
+
+        footer a {
+            color: var(--term-fg-faint);
+        }
+
+        @media (max-width: 800px) {
+            .hero,
+            .install-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 16px 16px 24px;
+            }
+
+            .window-body {
+                padding: 20px 16px;
+                gap: 40px;
+            }
+
+            .hero h1 {
+                font-size: 28px;
+            }
+
+            .hero-promise {
+                font-size: 15px;
+            }
+
+            .shots,
+            .card-grid,
+            .links-grid {
+                grid-template-columns: 1fr;
+            }
+
+            /* Copy button drops under the command so the one-liner gets the full width */
+            .code-block {
+                flex-direction: column;
+            }
+
+            .copy-btn {
+                border-left: none;
+                border-top: 1px solid var(--term-inner-border);
+            }
+
+            .whoami-entry {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .whoami dt {
+                min-width: unset;
+            }
+        }
+
+        /* Touch: lift every small control to the 44px comfort size */
+        @media (max-width: 600px), (pointer: coarse) {
+            .terminal-header {
+                padding-right: 0;
+            }
+
+            .header-home,
+            .tab-bar a {
+                min-height: 44px;
+            }
+        }
+
+        /* Reduced motion: no hover nudges, and the FAQ marker turns without animating (colour fades stay) */
+        @media (prefers-reduced-motion: reduce) {
+            .term-link:hover,
+            .term-link:hover .arrow {
+                transform: none;
+            }
+
+            .faq summary::before {
+                transition: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <!-- Icon sprite: each repeated icon is defined once and referenced with <use href="#i-..."> -->
+    <svg class="svg-sprite" aria-hidden="true" focusable="false">
+        <symbol id="i-github" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" /></symbol>
+        <symbol id="i-discord" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" /></symbol>
+        <symbol id="i-terminal" viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5" stroke="currentColor" stroke-width="2" fill="none"></polyline> <line x1="12" y1="19" x2="20" y2="19" stroke="currentColor" stroke-width="2"></line></symbol>
+        <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v11m0 0-4.5-4.5M12 14l4.5-4.5M4 17v3h16v-3" stroke="currentColor" stroke-width="2" fill="none" /></symbol>
+    </svg>
+
+    <div class="terminal-container">
+        <!-- Terminal Header with Konsole title and a way back home -->
+        <header class="terminal-header">
+            <div class="header-left">
+                <svg class="header-icon" aria-hidden="true"><use href="#i-terminal"></use></svg>
+                <span>ashley@cachyos-desktop-ashley: ~/osu-shelf</span>
+            </div>
+            <a class="header-home" href="/">cd ~</a>
+        </header>
+
+        <nav aria-label="Page sections">
+            <ul class="tab-bar">
+                <li><a href="#install">install</a></li>
+                <li><a href="#features">features</a></li>
+                <li><a href="#steps">how-it-works</a></li>
+                <li><a href="#faq">faq</a></li>
+                <li><a href="#docs">docs</a></li>
+                <li><a href="#community">community</a></li>
+            </ul>
+        </nav>
+
+        <main class="window-body" id="content" tabindex="-1">
+            <!-- Hero -->
+            <section class="hero" aria-labelledby="hero-title">
+                <div>
+                    <p class="cmd-line" aria-hidden="true">
+                        <span class="prompt-user">ashley</span><span class="prompt-at">@</span><span
+                            class="prompt-host">cachyos</span>
+                        <span class="prompt-dir">~&gt;</span>
+                        <span class="prompt-cmd">osu-shelf</span>
+                    </p>
+                    <h1 id="hero-title">osu-shelf</h1>
+                    <p class="hero-promise">Download osu!collector collections and get them into osu!, from a desktop
+                        app or your terminal.</p>
+                    <p class="muted">Every map comes from public beatmap mirrors, with a real <code>collection.db</code>
+                        alongside, and you never sign in to osu!. Works with osu!lazer (Torii and other lazer builds
+                        too) and osu! stable.</p>
+
+                    <div class="button-row">
+                        <a class="btn btn-primary" href="https://github.com/DesireThings/osu-shelf/releases/latest"
+                            target="_blank" rel="noopener noreferrer">
+                            <svg aria-hidden="true"><use href="#i-download"></use></svg>
+                            <span>Latest release v0.2.0</span>
+                        </a>
+                        <a class="btn" href="https://discord.gg/qTFvdSM2f7" target="_blank" rel="noopener noreferrer">
+                            <svg aria-hidden="true"><use href="#i-discord"></use></svg>
+                            <span>Join the Discord</span>
+                        </a>
+                    </div>
+
+                    <p class="disclaimer">An unofficial community tool, not made, endorsed or supported by ppy or
+                        osu!Collector. A fork of <a href="https://github.com/uwuclxdy/osu-collect" target="_blank"
+                            rel="noopener noreferrer">uwuclxdy/osu-collect</a>.</p>
+                </div>
+
+                <!-- Release info as a `whoami` key/value card -->
+                <div class="whoami">
+                    <p class="cmd-line" aria-hidden="true">
+                        <span class="prompt-dir">~/osu-shelf&gt;</span>
+                        <span class="prompt-cmd">whoami</span>
+                    </p>
+                    <h2 class="sr-only">Release info</h2>
+                    <dl>
+                        <div class="whoami-entry"><dt>version:</dt><dd>v0.2.0 (early access)</dd></div>
+                        <div class="whoami-entry"><dt>released:</dt><dd>27 October 2026</dd></div>
+                        <div class="whoami-entry"><dt>apps:</dt><dd>desktop &bull; terminal</dd></div>
+                        <div class="whoami-entry"><dt>systems:</dt><dd>Linux x64 &bull; Windows x64 &bull; macOS
+                                (Apple Silicon)</dd></div>
+                        <div class="whoami-entry"><dt>osu!:</dt><dd>lazer &bull; stable</dd></div>
+                        <div class="whoami-entry"><dt>command:</dt><dd><code>osu-collect</code></dd></div>
+                        <div class="whoami-entry"><dt>licence:</dt><dd>MIT or Apache-2.0</dd></div>
+                    </dl>
+                </div>
+            </section>
+
+            <!-- Screenshots -->
+            <section aria-labelledby="shots-title">
+                <p class="cmd-line" aria-hidden="true">
+                    <span class="prompt-dir">~/osu-shelf&gt;</span>
+                    <span class="prompt-cmd">ls media/</span>
+                </p>
+                <h2 id="shots-title">The desktop app</h2>
+                <div class="shots">
+                    <figure>
+                        <img src="https://raw.githubusercontent.com/DesireThings/osu-shelf/main/media/desktop-add-collections.png"
+                            alt="The desktop app downloading two osu!collector collections, one after the other, with a progress bar per collection"
+                            width="1106" height="742" loading="lazy" decoding="async">
+                        <figcaption>Add collections: paste links, then download one after another.</figcaption>
+                    </figure>
+                    <figure>
+                        <img src="https://raw.githubusercontent.com/DesireThings/osu-shelf/main/media/desktop-import.png"
+                            alt="The desktop app's import step: one folder with every downloaded collection, and the four steps to import it in osu!lazer"
+                            width="1106" height="742" loading="lazy" decoding="async">
+                        <figcaption>Import: one folder with every collection, ready for osu!lazer.</figcaption>
+                    </figure>
+                </div>
+            </section>
+
+            <!-- Install -->
+            <section id="install" aria-labelledby="install-title">
+                <p class="cmd-line" aria-hidden="true">
+                    <span class="prompt-dir">~/osu-shelf&gt;</span>
+                    <span class="prompt-cmd">cat INSTALL</span>
+                </p>
+                <h2 id="install-title">Install</h2>
+
+                <div class="install-grid">
+                    <div class="panel">
+                        <h3>Terminal app</h3>
+                        <p class="muted">Updates itself. The app and its command are still called
+                            <code>osu-collect</code>, so run <code>osu-collect</code> once it's installed.</p>
+
+                        <p class="cmd-label" id="cmd-unix-label">Linux x64 / macOS Apple Silicon</p>
+                        <div class="code-block">
+                            <pre aria-labelledby="cmd-unix-label"><code id="cmd-unix">curl -fsSL https://raw.githubusercontent.com/DesireThings/osu-collect/main/install.sh | bash</code></pre>
+                            <button type="button" class="copy-btn" data-copy="cmd-unix"
+                                aria-label="Copy the Linux and macOS install command">Copy</button>
+                        </div>
+
+                        <p class="cmd-label" id="cmd-win-label">Windows x64 (PowerShell)</p>
+                        <div class="code-block">
+                            <pre aria-labelledby="cmd-win-label"><code id="cmd-win">iwr https://raw.githubusercontent.com/DesireThings/osu-collect/main/install.bat -OutFile "$env:TEMP\osu-install.bat"; &amp; "$env:TEMP\osu-install.bat"; Remove-Item "$env:TEMP\osu-install.bat"</code></pre>
+                            <button type="button" class="copy-btn" data-copy="cmd-win"
+                                aria-label="Copy the Windows PowerShell install command">Copy</button>
+                        </div>
+
+                        <p class="note">Building from source, uninstalling and more: the <a
+                                href="https://github.com/DesireThings/osu-shelf/wiki/Installation" target="_blank"
+                                rel="noopener noreferrer">Installation</a> guide.</p>
+                    </div>
+
+                    <div class="panel">
+                        <h3>Desktop app</h3>
+                        <p class="muted">Download the file for your system from the <a
+                                href="https://github.com/DesireThings/osu-shelf/releases/latest" target="_blank"
+                                rel="noopener noreferrer">latest release</a>.</p>
+
+                        <table class="file-table">
+                            <caption class="sr-only">Desktop app download for each system</caption>
+                            <thead>
+                                <tr><th scope="col">System</th><th scope="col">File</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Windows 10/11</td><td><code>…-windows-x64-setup.exe</code></td></tr>
+                                <tr><td>Mac (Apple Silicon)</td><td><code>…-macos-arm64.dmg</code></td></tr>
+                                <tr><td>Linux</td><td><code>…-linux-x64.AppImage</code>, or <code>…-linux-amd64.deb</code>
+                                        on Debian/Ubuntu</td></tr>
+                            </tbody>
+                        </table>
+
+                        <p class="muted">The apps aren't signed with a paid certificate, so the first start shows a
+                            warning: on Windows, <strong>More info &rarr; Run anyway</strong>; on macOS,
+                            <strong>System Settings &rarr; Privacy &amp; Security &rarr; Open Anyway</strong>. The
+                            desktop app doesn't update itself yet; install a new version over the old one.</p>
+
+                        <p class="note">Early access (0.x): the Windows and macOS installers are built and checked
+                            automatically but haven't been run on a real Windows PC or Mac yet. If one doesn't work,
+                            please <a href="https://github.com/DesireThings/osu-shelf/issues/new/choose" target="_blank"
+                                rel="noopener noreferrer">open an issue</a>.</p>
+                    </div>
+                </div>
+
+                <!-- Announces copy results to screen readers -->
+                <p class="sr-only" id="copy-status" role="status" aria-live="polite"></p>
+            </section>
+
+            <!-- Features -->
+            <section id="features" aria-labelledby="features-title">
+                <p class="cmd-line" aria-hidden="true">
+                    <span class="prompt-dir">~/osu-shelf&gt;</span>
+                    <span class="prompt-cmd">osu-collect --help</span>
+                </p>
+                <h2 id="features-title">Features</h2>
+                <ul class="card-grid">
+                    <li>
+                        <span class="feature-tag">mirrors</span>
+                        <h3>Nine mirrors with failover</h3>
+                        <p>When a mirror rate-limits, its maps wait and retry while the rest keep downloading. Skip the
+                            stuck ones and fetch them later if you like.</p>
+                    </li>
+                    <li>
+                        <span class="feature-tag">find</span>
+                        <h3>Find maps without a collection</h3>
+                        <p>Search by name, stars, mapper, BPM and more, through the osu! API or nzbasic's community map
+                            database.</p>
+                    </li>
+                    <li>
+                        <span class="feature-tag">collection.db</span>
+                        <h3>A real collection</h3>
+                        <p>A verified <code>collection.db</code> next to the maps, so the collection itself shows up in
+                            osu!, not just the maps.</p>
+                    </li>
+                    <li>
+                        <span class="feature-tag">update</span>
+                        <h3>Keep collections up to date</h3>
+                        <p>Check a downloaded collection again and fetch only the new or missing maps.</p>
+                    </li>
+                    <li>
+                        <span class="feature-tag">no login</span>
+                        <h3>No osu! login</h3>
+                        <p>Paste a collection link and go. osu-shelf never asks for your osu! account.</p>
+                    </li>
+                    <li>
+                        <span class="feature-tag">lazer</span>
+                        <h3>Everything into lazer at once</h3>
+                        <p>However many collections you download, osu!lazer imports every map and collection in a
+                            single pass of its setup wizard.</p>
+                    </li>
+                </ul>
+            </section>
+
+            <!-- Three steps -->
+            <section id="steps" aria-labelledby="steps-title">
+                <p class="cmd-line" aria-hidden="true">
+                    <span class="prompt-dir">~/osu-shelf&gt;</span>
+                    <span class="prompt-cmd">osu-collect</span>
+                </p>
+                <h2 id="steps-title">Three steps</h2>
+                <ol class="card-grid steps">
+                    <li>
+                        <h3>Paste</h3>
+                        <p>Paste one or more osucollector.com links and check the names and map counts.</p>
+                    </li>
+                    <li>
+                        <h3>Pick a folder</h3>
+                        <p>Choose osu!lazer or osu! stable and a download folder. Your osu! folder is found
+                            automatically when it's in the usual place.</p>
+                    </li>
+                    <li>
+                        <h3>Import into osu!</h3>
+                        <p>For lazer, prepare the import folder and run osu!'s setup wizard once. For stable, drag in
+                            the <code>.osz</code> files and merge the <code>collection.db</code> with Collection
+                            Manager.</p>
+                    </li>
+                </ol>
+            </section>
+
+            <!-- FAQ (answers from the osu-shelf README) -->
+            <section id="faq" aria-labelledby="faq-title">
+                <p class="cmd-line" aria-hidden="true">
+                    <span class="prompt-dir">~/osu-shelf&gt;</span>
+                    <span class="prompt-cmd">cat FAQ</span>
+                </p>
+                <h2 id="faq-title">FAQ</h2>
+                <div class="faq">
+                    <details>
+                        <summary>Do I need an osu! account?</summary>
+                        <p>Not to download collections: osu-shelf never asks for your osu! login. Only the terminal
+                            app's find, when it searches through the osu! API, needs an API app of your own, which you
+                            make on your osu! account page; see <a
+                                href="https://github.com/DesireThings/osu-shelf/wiki/Finding-Maps#your-osu-api-app"
+                                target="_blank" rel="noopener noreferrer">Finding maps</a>.</p>
+                    </details>
+                    <details>
+                        <summary>Where do the maps come from?</summary>
+                        <p>The collection's details come from osu!Collector; the maps come from public beatmap mirrors,
+                            not from osu!'s servers. Which mirrors, and in what order, is up to you in the settings.</p>
+                    </details>
+                    <details>
+                        <summary>A download says map sets are "waiting for a free mirror". Is it stuck?</summary>
+                        <p>No. Every mirror that has those maps is rate-limiting, so they're retried once a mirror frees
+                            up, usually within minutes. In the desktop app you can <strong>Skip these for now</strong>
+                            and get them later with <strong>Check again</strong>.</p>
+                    </details>
+                    <details>
+                        <summary>I also use uwuclxdy's osu-collect. Can I keep both?</summary>
+                        <p>Yes, but they share one settings folder. This version deletes a saved osu!lazer login from
+                            the original, because it no longer signs in through osu!lazer's client. The original keeps
+                            updating from its own releases.</p>
+                    </details>
+                    <details>
+                        <summary>Does osu!Collector have its own app?</summary>
+                        <p>Yes, the <a href="https://osucollector.com/app" target="_blank"
+                                rel="noopener noreferrer">osu!Collector desktop client</a>. Its subscription pays for
+                            the site that hosts every collection osu-shelf reads. If you use osu!Collector a lot,
+                            consider supporting it.</p>
+                    </details>
+                </div>
+            </section>
+
+            <!-- Docs -->
+            <section id="docs" aria-labelledby="docs-title">
+                <p class="cmd-line" aria-hidden="true">
+                    <span class="prompt-dir">~/osu-shelf&gt;</span>
+                    <span class="prompt-cmd">ls wiki/</span>
+                </p>
+                <h2 id="docs-title">Docs</h2>
+                <ul class="links-grid">
+                    <li>
+                        <a class="term-link" href="https://github.com/DesireThings/osu-shelf/wiki/Usage" target="_blank"
+                            rel="noopener noreferrer">
+                            <span class="link-text"><span class="link-name">Usage</span><span class="link-desc">The
+                                    terminal app, tab by tab</span></span>
+                            <span class="arrow" aria-hidden="true">&rarr;</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="term-link" href="https://github.com/DesireThings/osu-shelf/wiki/Finding-Maps"
+                            target="_blank" rel="noopener noreferrer">
+                            <span class="link-text"><span class="link-name">Finding maps</span><span
+                                    class="link-desc">Search by stars, mapper, BPM and more</span></span>
+                            <span class="arrow" aria-hidden="true">&rarr;</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="term-link" href="https://github.com/DesireThings/osu-shelf/wiki/Updating-Collections"
+                            target="_blank" rel="noopener noreferrer">
+                            <span class="link-text"><span class="link-name">Updating collections</span><span
+                                    class="link-desc">Fetch only what's new or missing</span></span>
+                            <span class="arrow" aria-hidden="true">&rarr;</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="term-link" href="https://github.com/DesireThings/osu-shelf/wiki/Mirrors" target="_blank"
+                            rel="noopener noreferrer">
+                            <span class="link-text"><span class="link-name">Mirrors</span><span class="link-desc">The
+                                    nine built-ins, rate limits, your own</span></span>
+                            <span class="arrow" aria-hidden="true">&rarr;</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="term-link" href="https://github.com/DesireThings/osu-shelf/wiki/Importing-into-osu"
+                            target="_blank" rel="noopener noreferrer">
+                            <span class="link-text"><span class="link-name">Importing into osu!</span><span
+                                    class="link-desc">osu!lazer and osu! stable</span></span>
+                            <span class="arrow" aria-hidden="true">&rarr;</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="term-link" href="https://github.com/DesireThings/osu-shelf/wiki/Installation"
+                            target="_blank" rel="noopener noreferrer">
+                            <span class="link-text"><span class="link-name">Installation</span><span
+                                    class="link-desc">From source, uninstalling, more</span></span>
+                            <span class="arrow" aria-hidden="true">&rarr;</span>
+                        </a>
+                    </li>
+                </ul>
+            </section>
+
+            <!-- Community -->
+            <section id="community" aria-labelledby="community-title">
+                <p class="cmd-line" aria-hidden="true">
+                    <span class="prompt-dir">~/osu-shelf&gt;</span>
+                    <span class="prompt-cmd">ls community/</span>
+                </p>
+                <h2 id="community-title">Community</h2>
+                <ul class="links-grid">
+                    <li>
+                        <a class="term-link" href="https://discord.gg/qTFvdSM2f7" target="_blank" rel="noopener noreferrer">
+                            <span class="link-left">
+                                <svg aria-hidden="true"><use href="#i-discord"></use></svg>
+                                <span class="link-text"><span class="link-name">Discord</span><span
+                                        class="link-desc">Chat and quick help</span></span>
+                            </span>
+                            <span class="arrow" aria-hidden="true">&rarr;</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="term-link" href="https://github.com/DesireThings/osu-shelf/discussions" target="_blank"
+                            rel="noopener noreferrer">
+                            <span class="link-left">
+                                <svg aria-hidden="true"><use href="#i-github"></use></svg>
+                                <span class="link-text"><span class="link-name">Discussions</span><span
+                                        class="link-desc">Questions and ideas, kept findable</span></span>
+                            </span>
+                            <span class="arrow" aria-hidden="true">&rarr;</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="term-link" href="https://github.com/DesireThings/osu-shelf/issues/new/choose"
+                            target="_blank" rel="noopener noreferrer">
+                            <span class="link-left">
+                                <svg aria-hidden="true"><use href="#i-github"></use></svg>
+                                <span class="link-text"><span class="link-name">Issues</span><span
+                                        class="link-desc">Bugs and feature requests</span></span>
+                            </span>
+                            <span class="arrow" aria-hidden="true">&rarr;</span>
+                        </a>
+                    </li>
+                    <li>
+                        <div class="term-link is-placeholder">
+                            <span class="link-left">
+                                <svg aria-hidden="true"><use href="#i-discord"></use></svg>
+                                <span class="link-text"><span class="link-name">Discord bot</span><span
+                                        class="link-desc">Not available yet</span></span>
+                            </span>
+                            <span class="soon-badge">coming soon</span>
+                        </div>
+                    </li>
+                </ul>
+            </section>
+        </main>
+
+        <!-- Terminal Footer -->
+        <footer>
+            <span>&copy; Remi / Ashley &bull; <a href="https://github.com/DesireThings/osu-shelf" target="_blank"
+                    rel="noopener noreferrer">source on GitHub</a></span>
+            <span>osu-shelf v0.2.0 &bull; MIT / Apache-2.0</span>
+        </footer>
+    </div>
+
+    <script>
+        // Copy buttons: put the exact command on the clipboard and say so in the live region
+        const copyStatus = document.getElementById('copy-status');
+
+        function announce(message) {
+            // Clear first so the same message is read again on a second copy
+            copyStatus.textContent = '';
+            setTimeout(() => { copyStatus.textContent = message; }, 50);
+        }
+
+        document.querySelectorAll('.copy-btn').forEach((btn) => {
+            btn.addEventListener('click', async () => {
+                const code = document.getElementById(btn.dataset.copy);
+                try {
+                    await navigator.clipboard.writeText(code.textContent);
+                } catch (e) {
+                    console.warn('Copying the install command failed:', e);
+                    announce('Copy failed: select the command and copy it by hand.');
+                    return;
+                }
+                btn.textContent = 'Copied';
+                btn.classList.add('is-copied');
+                announce('Command copied to the clipboard.');
+                clearTimeout(btn.resetTimer);
+                btn.resetTimer = setTimeout(() => {
+                    btn.textContent = 'Copy';
+                    btn.classList.remove('is-copied');
+                }, 2000);
+            });
+        });
+    </script>
+</body>
+
+</html>
