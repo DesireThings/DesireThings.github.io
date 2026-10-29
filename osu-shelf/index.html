@@ -731,31 +731,6 @@
             transform: translateX(3px);
         }
 
-        /* Placeholder row for links that don't exist yet: not a link, not focusable */
-        .term-link.is-placeholder {
-            border-style: dashed;
-            color: var(--term-fg-faint);
-        }
-
-        .term-link.is-placeholder:hover {
-            background: var(--card-bg);
-            border-color: var(--term-inner-border);
-            color: var(--term-fg-faint);
-            transform: none;
-        }
-
-        .term-link.is-placeholder .link-name {
-            color: var(--term-fg-faint);
-        }
-
-        .soon-badge {
-            flex-shrink: 0;
-            font-size: 11px;
-            color: var(--c-yellow);
-            border: 1px solid rgba(194, 178, 100, 0.4);
-            padding: 1px 6px;
-        }
-
         footer {
             border-top: 1px solid var(--term-inner-border);
             background: var(--term-header);
@@ -1244,14 +1219,15 @@
                         </a>
                     </li>
                     <li>
-                        <div class="term-link is-placeholder">
+                        <a class="term-link" href="https://discord.com/oauth2/authorize?client_id=1565062368604717136"
+                            target="_blank" rel="noopener noreferrer">
                             <span class="link-left">
                                 <svg aria-hidden="true"><use href="#i-discord"></use></svg>
                                 <span class="link-text"><span class="link-name">Discord bot</span><span
-                                        class="link-desc">Not available yet</span></span>
+                                        class="link-desc">Add shelfkeeper to your server</span></span>
                             </span>
-                            <span class="soon-badge">coming soon</span>
-                        </div>
+                            <span class="arrow" aria-hidden="true">&rarr;</span>
+                        </a>
                     </li>
                 </ul>
             </section>
