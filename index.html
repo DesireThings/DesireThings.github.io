@@ -710,10 +710,6 @@
             margin-top: 8px;
         }
 
-        .links-grid .link-kofi {
-            grid-column: 1 / -1;
-        }
-
         .term-link {
             display: flex;
             align-items: center;
@@ -1151,6 +1147,10 @@
 
         .card-link-discord svg {
             color: var(--c-blue);
+        }
+
+        .card-link-shelf svg {
+            color: var(--c-magenta-intense);
         }
 
         .card-link-kofi svg {
@@ -1622,7 +1622,17 @@
                             </a>
                         </li>
 
-                        <li class="link-kofi">
+                        <li>
+                            <a class="term-link" href="/osu-shelf/">
+                                <div class="link-left">
+                                    <svg aria-hidden="true"><use href="#i-osu"></use></svg>
+                                    <span>osu-shelf</span>
+                                </div>
+                                <span class="arrow" aria-hidden="true">&rarr;</span>
+                            </a>
+                        </li>
+
+                        <li>
                             <a class="term-link" href="https://ko-fi.com/desirethings" target="_blank"
                                 rel="noopener noreferrer">
                                 <div class="link-left">
@@ -1735,6 +1745,16 @@
                         <div class="link-left">
                             <svg aria-hidden="true"><use href="#i-discord"></use></svg>
                             <span>Torii Nova Community Discord</span>
+                        </div>
+                        <span class="arrow" aria-hidden="true">&rarr;</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a class="card-link-item card-link-shelf" href="/osu-shelf/">
+                        <div class="link-left">
+                            <svg aria-hidden="true"><use href="#i-osu"></use></svg>
+                            <span>osu-shelf: osu!collector downloader</span>
                         </div>
                         <span class="arrow" aria-hidden="true">&rarr;</span>
                     </a>
@@ -2309,6 +2329,7 @@
                             <span class="fg-cyan">osu-profile</span>&nbsp;&nbsp;
                             <span class="fg-cyan">torii-profile</span>&nbsp;&nbsp;
                             <span class="fg-cyan">torii-discord</span>&nbsp;&nbsp;
+                            <span class="fg-cyan">osu-shelf</span>&nbsp;&nbsp;
                             <span class="fg-magenta">ko-fi</span>
                         `);
                     } else {
@@ -2331,6 +2352,7 @@
                             • osu!: https://osu.ppy.sh/users/18473778<br>
                             • Torii: https://torii-web.shikkesora.com/users/96<br>
                             • Discord: https://discord.gg/zeuKQquCSE<br>
+                            • osu-shelf: https://desirethings.github.io/osu-shelf/<br>
                             • Ko-fi: https://ko-fi.com/desirethings
                         `);
                     } else if (!file) {
