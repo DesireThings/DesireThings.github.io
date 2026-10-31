@@ -908,7 +908,7 @@
                     <h2 class="sr-only">Release info</h2>
                     <dl>
                         <div class="whoami-entry"><dt>version:</dt><dd>v0.3.0 (early access)</dd></div>
-                        <div class="whoami-entry"><dt>released:</dt><dd>27 October 2026</dd></div>
+                        <div class="whoami-entry"><dt>released:</dt><dd>31 October 2026</dd></div>
                         <div class="whoami-entry"><dt>apps:</dt><dd>desktop &bull; terminal</dd></div>
                         <div class="whoami-entry"><dt>systems:</dt><dd>Linux x64 &bull; Windows x64 &bull; macOS
                                 (Apple Silicon)</dd></div>
@@ -1110,9 +1110,12 @@
                     </details>
                     <details>
                         <summary>I also use uwuclxdy's osu-collect. Can I keep both?</summary>
-                        <p>Yes, but they share one settings folder. This version deletes a saved osu!lazer login from
-                            the original, because it no longer signs in through osu!lazer's client. The original keeps
-                            updating from its own releases.</p>
+                        <p>Yes. Since 0.3.0 the two keep separate settings: osu-shelf reads its own
+                            <code>osu-shelf</code> folder and copies the old <code>osu-collect</code> one once on first
+                            start, leaving the original's files alone. An existing <code>~/Downloads/osu-collect</code>
+                            folder keeps being used for downloads, so rename it or pick another folder if you want them
+                            apart. A saved osu!lazer login is dropped from the copy, because osu-shelf no longer signs
+                            in through osu!lazer's client. The original keeps updating from its own releases.</p>
                     </details>
                     <details>
                         <summary>Does osu!Collector have its own app?</summary>
