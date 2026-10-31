@@ -667,6 +667,11 @@
             padding: 0;
         }
 
+        /* An odd last row spans both columns instead of leaving a gap */
+        .links-grid > li:last-child:nth-child(odd) {
+            grid-column: 1 / -1;
+        }
+
         .term-link {
             display: flex;
             align-items: center;
@@ -1214,17 +1219,6 @@
                                 <svg aria-hidden="true"><use href="#i-github"></use></svg>
                                 <span class="link-text"><span class="link-name">Issues</span><span
                                         class="link-desc">Bugs and feature requests</span></span>
-                            </span>
-                            <span class="arrow" aria-hidden="true">&rarr;</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a class="term-link" href="https://discord.com/oauth2/authorize?client_id=1565062368604717136"
-                            target="_blank" rel="noopener noreferrer">
-                            <span class="link-left">
-                                <svg aria-hidden="true"><use href="#i-discord"></use></svg>
-                                <span class="link-text"><span class="link-name">Discord bot</span><span
-                                        class="link-desc">Add shelfkeeper to your server</span></span>
                             </span>
                             <span class="arrow" aria-hidden="true">&rarr;</span>
                         </a>
