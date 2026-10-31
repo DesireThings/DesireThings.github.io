@@ -38,7 +38,7 @@
             "alternateName": "osu-collect",
             "url": "https://desirethings.github.io/osu-shelf/",
             "downloadUrl": "https://github.com/DesireThings/osu-shelf/releases/latest",
-            "softwareVersion": "0.2.0",
+            "softwareVersion": "0.3.0",
             "applicationCategory": "UtilitiesApplication",
             "operatingSystem": "Linux, Windows, macOS",
             "license": "https://github.com/DesireThings/osu-shelf#license",
@@ -886,7 +886,7 @@
                         <a class="btn btn-primary" href="https://github.com/DesireThings/osu-shelf/releases/latest"
                             target="_blank" rel="noopener noreferrer">
                             <svg aria-hidden="true"><use href="#i-download"></use></svg>
-                            <span>Latest release v0.2.0</span>
+                            <span>Latest release v0.3.0</span>
                         </a>
                         <a class="btn" href="https://discord.gg/qTFvdSM2f7" target="_blank" rel="noopener noreferrer">
                             <svg aria-hidden="true"><use href="#i-discord"></use></svg>
@@ -907,13 +907,13 @@
                     </p>
                     <h2 class="sr-only">Release info</h2>
                     <dl>
-                        <div class="whoami-entry"><dt>version:</dt><dd>v0.2.0 (early access)</dd></div>
+                        <div class="whoami-entry"><dt>version:</dt><dd>v0.3.0 (early access)</dd></div>
                         <div class="whoami-entry"><dt>released:</dt><dd>27 October 2026</dd></div>
                         <div class="whoami-entry"><dt>apps:</dt><dd>desktop &bull; terminal</dd></div>
                         <div class="whoami-entry"><dt>systems:</dt><dd>Linux x64 &bull; Windows x64 &bull; macOS
                                 (Apple Silicon)</dd></div>
                         <div class="whoami-entry"><dt>osu!:</dt><dd>lazer &bull; stable</dd></div>
-                        <div class="whoami-entry"><dt>command:</dt><dd><code>osu-collect</code></dd></div>
+                        <div class="whoami-entry"><dt>command:</dt><dd><code>osu-shelf</code></dd></div>
                         <div class="whoami-entry"><dt>licence:</dt><dd>MIT or Apache-2.0</dd></div>
                     </dl>
                 </div>
@@ -953,19 +953,19 @@
                 <div class="install-grid">
                     <div class="panel">
                         <h3>Terminal app</h3>
-                        <p class="muted">Updates itself. The app and its command are still called
-                            <code>osu-collect</code>, so run <code>osu-collect</code> once it's installed.</p>
+                        <p class="muted">Updates itself. The app and its command are both called
+                            <code>osu-shelf</code>, so run <code>osu-shelf</code> once it's installed.</p>
 
                         <p class="cmd-label" id="cmd-unix-label">Linux x64 / macOS Apple Silicon</p>
                         <div class="code-block">
-                            <pre aria-labelledby="cmd-unix-label"><code id="cmd-unix">curl -fsSL https://raw.githubusercontent.com/DesireThings/osu-collect/main/install.sh | bash</code></pre>
+                            <pre aria-labelledby="cmd-unix-label"><code id="cmd-unix">curl -fsSL https://raw.githubusercontent.com/DesireThings/osu-shelf/main/install.sh | bash</code></pre>
                             <button type="button" class="copy-btn" data-copy="cmd-unix"
                                 aria-label="Copy the Linux and macOS install command">Copy</button>
                         </div>
 
                         <p class="cmd-label" id="cmd-win-label">Windows x64 (PowerShell)</p>
                         <div class="code-block">
-                            <pre aria-labelledby="cmd-win-label"><code id="cmd-win">iwr https://raw.githubusercontent.com/DesireThings/osu-collect/main/install.bat -OutFile "$env:TEMP\osu-install.bat"; &amp; "$env:TEMP\osu-install.bat"; Remove-Item "$env:TEMP\osu-install.bat"</code></pre>
+                            <pre aria-labelledby="cmd-win-label"><code id="cmd-win">iwr https://raw.githubusercontent.com/DesireThings/osu-shelf/main/install.bat -OutFile "$env:TEMP\osu-install.bat"; &amp; "$env:TEMP\osu-install.bat"; Remove-Item "$env:TEMP\osu-install.bat"</code></pre>
                             <button type="button" class="copy-btn" data-copy="cmd-win"
                                 aria-label="Copy the Windows PowerShell install command">Copy</button>
                         </div>
@@ -1014,7 +1014,7 @@
             <section id="features" aria-labelledby="features-title">
                 <p class="cmd-line" aria-hidden="true">
                     <span class="prompt-dir">~/osu-shelf&gt;</span>
-                    <span class="prompt-cmd">osu-collect --help</span>
+                    <span class="prompt-cmd">osu-shelf --help</span>
                 </p>
                 <h2 id="features-title">Features</h2>
                 <ul class="card-grid">
@@ -1059,7 +1059,7 @@
             <section id="steps" aria-labelledby="steps-title">
                 <p class="cmd-line" aria-hidden="true">
                     <span class="prompt-dir">~/osu-shelf&gt;</span>
-                    <span class="prompt-cmd">osu-collect</span>
+                    <span class="prompt-cmd">osu-shelf</span>
                 </p>
                 <h2 id="steps-title">Three steps</h2>
                 <ol class="card-grid steps">
@@ -1231,7 +1231,7 @@
         <footer>
             <span>&copy; Remi / Ashley &bull; <a href="https://github.com/DesireThings/osu-shelf" target="_blank"
                     rel="noopener noreferrer">source on GitHub</a></span>
-            <span>osu-shelf v0.2.0 &bull; MIT / Apache-2.0</span>
+            <span>osu-shelf v0.3.0 &bull; MIT / Apache-2.0</span>
         </footer>
     </div>
 
