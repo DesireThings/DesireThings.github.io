@@ -1417,7 +1417,7 @@
                 </div>
 
                 <div class="header-right">
-                    <button class="mode-toggle-btn" id="mode-toggle-to-gui" title="Switch to Simple Card View">
+                    <button type="button" class="mode-toggle-btn" id="mode-toggle-to-gui" title="Switch to Simple Card View">
                         <svg viewBox="0 0 24 24" aria-hidden="true">
                             <path d="M4 4h6v6H4zm10 0h6v6h-6zM4 14h6v6H4zm10 0h6v6h-6z" />
                         </svg>
@@ -1427,19 +1427,19 @@
                     <div class="terminal-status" id="live-clock">UK &bull; --:--</div>
 
                     <!-- Klassy Window Buttons (Minimize, Maximize/Restore, Close) -->
-                    <div class="klassy-buttons" aria-label="Window controls">
-                        <button class="klassy-btn btn-min" id="win-min" title="Minimize / Roll up" aria-label="Minimize" aria-pressed="false">
+                    <div class="klassy-buttons" role="group" aria-label="Window controls">
+                        <button type="button" class="klassy-btn btn-min" id="win-min" title="Minimize / Roll up" aria-label="Minimize" aria-pressed="false">
                             <svg viewBox="0 0 12 12" aria-hidden="true">
                                 <line x1="2" y1="6" x2="10" y2="6"></line>
                             </svg>
                         </button>
-                        <button class="klassy-btn btn-max" id="win-max" title="Maximize / Toggle width"
+                        <button type="button" class="klassy-btn btn-max" id="win-max" title="Maximize / Toggle width"
                             aria-label="Maximize" aria-pressed="false">
                             <svg viewBox="0 0 12 12" aria-hidden="true">
                                 <rect x="2" y="2" width="8" height="8"></rect>
                             </svg>
                         </button>
-                        <button class="klassy-btn btn-close" id="win-close" title="Close session" aria-label="Close">
+                        <button type="button" class="klassy-btn btn-close" id="win-close" title="Close session" aria-label="Close">
                             <svg viewBox="0 0 12 12" aria-hidden="true">
                                 <line x1="2" y1="2" x2="10" y2="10"></line>
                                 <line x1="10" y1="2" x2="2" y2="10"></line>
@@ -1475,7 +1475,7 @@
                             </a>
 
                             <!-- Discord Handle with Mini Discord Logo & Copy action -->
-                            <button class="copy-discord-btn" id="copy-btn" title="Click to copy Discord handle"
+                            <button type="button" class="copy-discord-btn" id="copy-btn" title="Click to copy Discord handle"
                                 aria-label="Copy Discord handle desire_things">
                                 <svg aria-hidden="true"><use href="#i-discord"></use></svg>
                                 <span>desire_things</span>
@@ -1484,7 +1484,7 @@
                         </div>
 
                         <p class="bio-text">
-                            Linux enthusiast & CachyOS daily driver. osu! player, Torii Nova contributor, and community
+                            Linux enthusiast &amp; CachyOS daily driver. osu! player, Torii Nova contributor, and community
                             administrator.
                         </p>
                     </div>
@@ -1673,7 +1673,7 @@
         <!-- Modern Card / Guns.lol style Bio View -->
         <section class="card-view-container" id="card-view-container" aria-label="Simple Profile View">
             <div class="card-top-bar">
-                <button class="mode-toggle-btn" id="mode-toggle-to-term" title="Switch back to Konsole Terminal View">
+                <button type="button" class="mode-toggle-btn" id="mode-toggle-to-term" title="Switch back to Konsole Terminal View">
                     <svg aria-hidden="true"><use href="#i-terminal"></use></svg>
                     <span>Terminal View</span>
                 </button>
@@ -1699,7 +1699,7 @@
                     <svg aria-hidden="true"><use href="#i-github"></use></svg>
                     <span>DesireThings</span>
                 </a>
-                <button class="copy-discord-btn" id="card-copy-btn" title="Click to copy Discord handle">
+                <button type="button" class="copy-discord-btn" id="card-copy-btn" title="Click to copy Discord handle">
                     <svg aria-hidden="true"><use href="#i-discord"></use></svg>
                     <span>desire_things</span>
                     <span class="copied-tooltip" id="card-copied-badge">Copied!</span>
@@ -1713,7 +1713,7 @@
                         rel="noopener noreferrer">
                         <div class="link-left">
                             <svg aria-hidden="true"><use href="#i-github"></use></svg>
-                            <span>GitHub Profile & Projects</span>
+                            <span>GitHub Profile &amp; Projects</span>
                         </div>
                         <span class="arrow" aria-hidden="true">&rarr;</span>
                     </a>
@@ -1775,7 +1775,7 @@
             </ul>
 
             <div class="card-specs-preview">
-                <h2 class="card-specs-title">Rig & Setup</h2>
+                <h2 class="card-specs-title">Rig &amp; Setup</h2>
                 <div class="card-specs-line">CachyOS Linux &bull; i5-13600KF &bull; AMD RX 9070 XT &bull; 32GB
                     RAM</div>
                 <div class="card-specs-line">Wooting Two HE &bull; Wacom CTL-480 @ 1000Hz</div>
@@ -1793,7 +1793,7 @@
 
     <div class="terminal-restore-toast" id="restore-toast">
         <span>Terminal session hidden</span>
-        <button class="terminal-restore-btn" id="restore-btn">Restore (fg)</button>
+        <button type="button" class="terminal-restore-btn" id="restore-btn">Restore (fg)</button>
     </div>
 
     <!-- CachyOS Bootloader (GRUB) Style First-time Mode Selector Modal -->
@@ -1807,27 +1807,27 @@
                 Select how you would like to load <strong>Remi / Ashley's</strong> portfolio:
             </p>
             <div class="boot-options">
-                <button class="boot-opt-btn is-selected" id="boot-opt-term" data-mode="terminal" autofocus>
-                    <div class="boot-opt-main">
+                <button type="button" class="boot-opt-btn is-selected" id="boot-opt-term" data-mode="terminal" autofocus>
+                    <span class="boot-opt-main">
                         <span class="boot-opt-key">[ 1 ]</span>
-                        <div class="boot-opt-text">
-                            <div class="boot-opt-title">CachyOS Konsole Terminal (System24)</div>
-                            <div class="boot-opt-desc">Full interactive CLI with fastfetch, fish prompt & commands
-                            </div>
-                        </div>
-                    </div>
+                        <span class="boot-opt-text">
+                            <span class="boot-opt-title">CachyOS Konsole Terminal (System24)</span>
+                            <span class="boot-opt-desc">Full interactive CLI with fastfetch, fish prompt &amp; commands
+                            </span>
+                        </span>
+                    </span>
                     <span class="boot-opt-tag">Default</span>
                 </button>
 
-                <button class="boot-opt-btn" id="boot-opt-card" data-mode="card">
-                    <div class="boot-opt-main">
+                <button type="button" class="boot-opt-btn" id="boot-opt-card" data-mode="card">
+                    <span class="boot-opt-main">
                         <span class="boot-opt-key">[ 2 ]</span>
-                        <div class="boot-opt-text">
-                            <div class="boot-opt-title">Simple Card Bio View (guns.lol style)</div>
-                            <div class="boot-opt-desc">Clean modern bio card with direct clickable link buttons
-                            </div>
-                        </div>
-                    </div>
+                        <span class="boot-opt-text">
+                            <span class="boot-opt-title">Simple Card Bio View (guns.lol style)</span>
+                            <span class="boot-opt-desc">Clean modern bio card with direct clickable link buttons
+                            </span>
+                        </span>
+                    </span>
                     <span class="boot-opt-tag">GUI</span>
                 </button>
             </div>
